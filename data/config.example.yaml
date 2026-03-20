@@ -1,0 +1,45 @@
+# 个人微信视觉 AI 助手 配置文件 (MVP)
+#
+# ============================================================
+# 🚀 新用户快速上手指南：
+# 1. 将此文件复制为 config.yaml（同目录下）
+# 2. 在项目根目录创建 .env 文件，填写你的 LLM API 密钥
+# 3. 运行坐标校准脚本：python calibrate.py
+#    程序会自动弹出微信截图，你用鼠标框选三个区域即可
+#    校准完成后坐标会自动写入 config.yaml，无需手动填写！
+# ============================================================
+
+# 窗口校准坐标及尺寸（相对于微信窗口左上角的偏移量）
+# ⚠️ 以下坐标全部由 calibrate.py 自动生成，请勿手动修改
+window:
+  # 运行前务必保持微信客户端为浅色模式
+  theme: "light"
+  # 截图目标左侧会话列表区域 [x, y, width, height]
+  session_list_rect: [0, 0, 0, 0]
+  # 截图目标最左侧深灰导航栏的聊天图标 [x, y, width, height]
+  nav_chat_icon_rect: [0, 50, 87, 100]
+  # 截图目标右侧聊天内容区域 [x, y, width, height]
+  chat_content_rect: [0, 0, 0, 0]
+  # 聊天标题栏区域（显示当前联系人名字）[x, y, width, height]
+  chat_title_rect: [0, 0, 0, 0]
+  # 底部输入框中心坐标 [x, y]
+  input_box_center: [0, 0]
+
+# OCR 相关配置
+ocr:
+  confidence_threshold: 0.7
+
+# LLM 接口配置
+# ⚠️ 请勿在此处填写真实 API Key！请在项目根目录 .env 文件中设置：
+#   LLM_API_KEY=你的密钥
+#   LLM_BASE_URL=https://api.deepseek.com/v1
+#   LLM_MODEL=deepseek-chat
+llm:
+  api_key: ""
+  base_url: ""
+  model: ""
+
+# 拟人化/防风控相关设置
+anti_risk:
+  global_typo_rate: 0.02
+  sleep_hours: "00:00-07:00"

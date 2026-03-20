@@ -1,0 +1,12 @@
+pygetwindow
+pyautogui
+pynput
+opencv-python
+mss
+paddleocr
+paddlepaddle
+langchain
+chromadb
+openai
+pyyaml
+python-dotenv

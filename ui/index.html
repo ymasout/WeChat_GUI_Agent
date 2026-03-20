@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>WeChat.AI</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-main: #f0f4fa;
+            --bg-white: #ffffff;
+            --bg-chip: #f5f7fb;
+            --text-primary: #1a1a2e;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --border-light: #e8ecf4;
+            --accent-blue: #4a7dff;
+            --accent-blue-hover: #3a6ae8;
+            --accent-green: #22c55e;
+            --accent-orange: #f59e0b;
+            --accent-red: #ef4444;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+            --shadow-btn: 0 4px 14px rgba(74,125,255,0.35);
+            --radius: 12px;
+            --radius-pill: 999px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', 'PingFang SC', -apple-system, system-ui, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            background: var(--bg-main);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            user-select: none;
+            border-radius: 16px;
+        }
+
+        /* ===== 顶部状态栏（可拖拽移动窗口）===== */
+        .top-bar {
+            height: 56px;
+            background: var(--bg-white);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--border-light);
+            flex-shrink: 0;
+            -webkit-app-region: drag; /* 拖拽移动窗口 */
+            border-radius: 16px 16px 0 0;
+        }
+        /* 按钮区排除拖拽 */
+        .top-bar .top-right,
+        .top-bar button { -webkit-app-region: no-drag; }
+
+        /* 窗口控制按钮 */
+        .win-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: var(--text-muted);
+            transition: all 0.15s;
+        }
+        .win-btn:hover { background: var(--bg-chip); color: var(--text-primary); }
+        .win-btn.close:hover { background: #fee2e2; color: #ef4444; }
+        .win-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+        .top-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 渐变旋转 Logo */
+        .app-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: conic-gradient(from 0deg, #4a7dff, #a78bfa, #ec4899, #f59e0b, #22c55e, #4a7dff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: logoSpin 6s linear infinite;
+            position: relative;
+        }
+        .app-logo::after {
+            content: '';
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-white);
+        }
+        .app-logo.running { animation: logoSpin 2s linear infinite; }
+        .app-logo.idle { animation: none; }
+
+        @keyframes logoSpin { to { transform: rotate(360deg); } }
+
+        .status-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .status-label {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-orange);
+            box-shadow: 0 0 6px var(--accent-orange);
+            transition: all 0.5s;
+        }
+        .status-dot.online {
+            background: var(--accent-green);
+            box-shadow: 0 0 8px rgba(34,197,94,0.5);
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .top-right {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .icon-btn {
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background 0.15s;
+            color: var(--text-secondary);
+            border: none;
+            background: none;
+        }
+        .icon-btn:hover { background: var(--bg-chip); }
+        .icon-btn svg {
+            width: 20px; height: 20px;
+            fill: none; stroke: currentColor;
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+        }
+
+        /* ===== 主内容：日志区 ===== */
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            scroll-behavior: smooth;
+        }
+        .content-area::-webkit-scrollbar { width: 0; }
+
+        .log-entry {
+            font-size: 14px;
+            line-height: 1.7;
+            color: var(--text-secondary);
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.04);
+            opacity: 0;
+            transform: translateY(6px);
+            animation: fadeUp 0.3s ease-out forwards;
+        }
+        .log-entry:last-child { border-bottom: none; }
+
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+
+        /* 日志类型标记 */
+        .log-entry .log-icon {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border-radius: 4px;
+            text-align: center;
+            line-height: 18px;
+            font-size: 11px;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .log-icon.info  { background: #dbeafe; color: #2563eb; }
+        .log-icon.ok    { background: #d1fae5; color: #059669; }
+        .log-icon.warn  { background: #fef3c7; color: #d97706; }
+        .log-icon.reply { background: #ede9fe; color: #7c3aed; }
+        .log-icon.find  { background: #fee2e2; color: #dc2626; }
+
+        .log-entry.type-system {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 12px;
+            border-bottom: none;
+            padding: 6px 0;
+        }
+
+        /* ===== 底部控制条 ===== */
+        .action-bar {
+            padding: 12px 16px 16px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* 启动/停止按钮 */
+        .btn-launch {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+            white-space: nowrap;
+        }
+        .btn-launch svg { width: 16px; height: 16px; fill: currentColor; stroke: none; }
+
+        .btn-launch.start {
+            background: var(--accent-blue);
+            color: #fff;
+            box-shadow: var(--shadow-btn);
+        }
+        .btn-launch.start:hover { background: var(--accent-blue-hover); transform: translateY(-1px); }
+        .btn-launch.start:active { transform: scale(0.97); }
+
+        .btn-launch.stop {
+            background: var(--accent-red);
+            color: #fff;
+            box-shadow: 0 4px 14px rgba(239,68,68,0.3);
+        }
+        .btn-launch.stop:hover { background: #dc2626; }
+
+        /* 芯片选择器 */
+        .chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 9px 14px;
+            background: var(--bg-chip);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-pill);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+            cursor: default;
+            white-space: nowrap;
+        }
+        .chip svg {
+            width: 16px; height: 16px;
+            fill: none; stroke: currentColor;
+            stroke-width: 2; stroke-linecap: round; stroke-linejoin: round;
+        }
+        .chip .chip-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: var(--accent-blue);
+        }
+        .chip .chip-wechat {
+            width: 20px; height: 20px;
+        }
+
+        /* 微信绿色小图标 */
+        .wechat-icon {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            background: #07c160;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .wechat-icon svg { width: 12px; height: 12px; fill: #fff; stroke: none; }
+
+        .chip .arrow { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
+
+        /* ===== 底部 Tab 导航 ===== */
+        .tab-nav {
+            height: 54px;
+            background: var(--bg-white);
+            border-top: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            padding: 4px 14px;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .tab-item:hover { background: var(--bg-chip); }
+        .tab-item svg {
+            width: 22px; height: 22px;
+            fill: none; stroke: var(--text-muted);
+            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+            transition: stroke 0.15s;
+        }
+        .tab-item span { font-size: 10px; color: var(--text-muted); font-weight: 500; transition: color 0.15s; }
+        .tab-item.active svg { stroke: var(--accent-blue); }
+        .tab-item.active span { color: var(--accent-blue); font-weight: 600; }
+
+        /* ===== 其他面板 ===== */
+        .panel { display: none; flex-direction: column; height: 100%; }
+        .panel.active { display: flex; }
+        .placeholder-box {
+            flex: 1; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; gap: 10px; color: var(--text-muted);
+        }
+        .placeholder-box svg { width: 48px; height: 48px; stroke: var(--text-muted); fill: none; stroke-width: 1.2; opacity: 0.4; stroke-linecap: round; stroke-linejoin: round; }
+        .placeholder-box .ph-t { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
+        .placeholder-box .ph-d { font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部状态栏 -->
+    <div class="top-bar">
+        <div class="top-left">
+            <div class="app-logo idle" id="appLogo"></div>
+            <div class="status-group">
+                <span class="status-label" id="statusLabel">等待中</span>
+                <div class="status-dot" id="statusDot"></div>
+            </div>
+        </div>
+        <div class="top-right">
+            <button class="icon-btn" onclick="clearLogs()" title="清屏">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
+            </button>
+            <div style="width:1px;height:20px;background:var(--border-light);margin:0 4px;"></div>
+            <button class="win-btn" onclick="minimizeApp()" title="最小化">
+                <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            </button>
+            <button class="win-btn close" onclick="closeApp()" title="关闭">
+                <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
+
+        <!-- 面板 1: 监控日志 -->
+        <div id="panel-monitor" class="panel active">
+            <div class="content-area" id="logArea">
+                <div class="log-entry type-system">WeChat.AI 控制台已就绪，点击底部「启动」按钮即可开始。</div>
+            </div>
+
+            <div class="action-bar">
+                <button class="btn-launch start" id="btnLaunch" onclick="toggleEngine()">
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    启动
+                </button>
+                <div class="chip">
+                    <div class="chip-dot"></div>
+                    <span>DeepSeek-V3</span>
+                    <span class="arrow">›</span>
+                </div>
+                <div class="chip">
+                    <div class="wechat-icon"><svg viewBox="0 0 24 24"><path d="M8.5 10a1 1 0 100-2 1 1 0 000 2zm5-1a1 1 0 11-2 0 1 1 0 012 0zM7 14.5c2.5 2 5.5 2 8 0"/></svg></div>
+                    <span>自动</span>
+                    <span class="arrow">›</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 面板 2: 配置 -->
+        <div id="panel-settings" class="panel">
+            <div class="placeholder-box">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                <div class="ph-t">核心参数配置</div>
+                <div class="ph-d">API Key · 坐标校准 · 扫描频率（开发中）</div>
+            </div>
+        </div>
+
+        <!-- 面板 3: 人设 -->
+        <div id="panel-persona" class="panel">
+            <div class="placeholder-box">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                <div class="ph-t">联系人与专属人设</div>
+                <div class="ph-d">为不同的人配置独立 Prompt（开发中）</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 Tab -->
+    <div class="tab-nav">
+        <div class="tab-item active" onclick="switchTab('panel-monitor', this)">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>监控</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('panel-settings', this)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>配置</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('panel-persona', this)">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <span>人设</span>
+        </div>
+    </div>
+
+    <script>
+        let isRunning = false;
+        let pollTimer = null;
+        const logArea = document.getElementById('logArea');
+        const btnLaunch = document.getElementById('btnLaunch');
+        const statusLabel = document.getElementById('statusLabel');
+        const statusDot = document.getElementById('statusDot');
+        const appLogo = document.getElementById('appLogo');
+
+        function switchTab(id, el) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            el.classList.add('active');
+        }
+
+        function appendLog(raw) {
+            let time = '', msg = raw;
+            const m = raw.match(/^\[(.*?)\]\s(.*)/s);
+            if (m) { time = m[1]; msg = m[2]; }
+
+            const el = document.createElement('div');
+            el.className = 'log-entry';
+
+            // 判断类型 & 添加小图标
+            let iconClass = 'info', iconText = 'i';
+            if (msg.includes('🗣️') || msg.includes('回复')) { iconClass = 'reply'; iconText = '↩'; }
+            else if (msg.includes('✅')) { iconClass = 'ok'; iconText = '✓'; }
+            else if (msg.includes('🎯') || msg.includes('👤') || msg.includes('🔍')) { iconClass = 'find'; iconText = '!'; }
+            else if (msg.includes('⚠️')) { iconClass = 'warn'; iconText = '⚠'; }
+            else if (msg.includes('🟢') || msg.includes('[系统]') || msg.includes('最小化')) {
+                el.className = 'log-entry type-system';
+                el.textContent = msg;
+                logArea.appendChild(el);
+                if (logArea.children.length > 150) logArea.removeChild(logArea.firstElementChild);
+                logArea.scrollTop = logArea.scrollHeight;
+                return;
+            }
+
+            const icon = document.createElement('span');
+            icon.className = 'log-icon ' + iconClass;
+            icon.textContent = iconText;
+            el.appendChild(icon);
+
+            const txt = document.createTextNode((time ? time + ' ' : '') + msg);
+            el.appendChild(txt);
+
+            logArea.appendChild(el);
+            if (logArea.children.length > 150) logArea.removeChild(logArea.firstElementChild);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+
+        function clearLogs() {
+            logArea.innerHTML = '';
+            appendLog('[系统] 终端已清理');
+        }
+
+        function minimizeApp() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.minimize_app();
+            }
+        }
+
+        function closeApp() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.close_app();
+            }
+        }
+
+        function pollLogs() {
+            if (window.pywebview && window.pywebview.api) {
+                window.pywebview.api.get_logs().then(logs => {
+                    if (logs && logs.length) logs.forEach(m => appendLog(m));
+                });
+            }
+        }
+
+        function setUI(running) {
+            isRunning = running;
+            if (running) {
+                statusLabel.textContent = '运行中';
+                statusDot.classList.add('online');
+                appLogo.classList.remove('idle');
+                appLogo.classList.add('running');
+                btnLaunch.className = 'btn-launch stop';
+                btnLaunch.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> 停止';
+            } else {
+                statusLabel.textContent = '等待中';
+                statusDot.classList.remove('online');
+                appLogo.classList.remove('running');
+                appLogo.classList.add('idle');
+                btnLaunch.className = 'btn-launch start';
+                btnLaunch.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> 启动';
+            }
+        }
+
+        function toggleEngine() {
+            if (!window.pywebview || !window.pywebview.api) return;
+            if (!isRunning) {
+                window.pywebview.api.start_engine().then(r => {
+                    if (r.status === 'ok') {
+                        setUI(true);
+                        if (!pollTimer) pollTimer = setInterval(pollLogs, 400);
+                    }
+                });
+            } else {
+                window.pywebview.api.stop_engine().then(r => {
+                    if (r.status === 'ok') setUI(false);
+                });
+            }
+        }
+
+        window.addEventListener('pywebviewready', () => {
+            appendLog('[系统] 引擎核心已加载，所有模块待命中。');
+            setInterval(pollLogs, 1000);
+        });
+    </script>
+</body>
+</html>

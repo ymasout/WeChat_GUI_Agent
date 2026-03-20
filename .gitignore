@@ -1,0 +1,45 @@
+# ============================
+# WeChat AI Agent - Git Ignore
+# ============================
+
+# ---------- Python ----------
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+*.egg
+dist/
+build/
+
+# ---------- 虚拟环境 ----------
+.venv/
+venv/
+ENV/
+
+# ---------- 敏感文件（绝对不能上传！）----------
+.env
+data/config.yaml
+
+# ---------- IDE / 编辑器 ----------
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---------- 调试产物 ----------
+debug_*.png
+*.log
+
+# ---------- PaddleOCR 模型缓存 ----------
+~/.paddleocr/
+
+# ---------- 系统杂项 ----------
+*.bak
+*.tmp
