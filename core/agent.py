@@ -20,22 +20,42 @@ class AgentBrain:
     抛弃复杂的原生逻辑代码，通过兼容 OpenAI 的封装直连各大模型 API (DeepSeek/GPT 等)
     构造拥有“灵魂人设”的上下文并指挥它吐出神似人类的聊天回复
     """
-    def __init__(self, config_path="config.yaml"):
+    def __init__(self, config_path="data/config.yaml"):
         self.config = self._load_config(config_path)
-        llm_cfg = self.config.get("llm", {})
-        
-        # 优先级：环境变量(.env) > config.yaml > 默认值
-        api_key = os.environ.get("LLM_API_KEY") or llm_cfg.get("api_key", "")
-        base_url = os.environ.get("LLM_BASE_URL") or llm_cfg.get("base_url", "")
-        self.model = os.environ.get("LLM_MODEL") or llm_cfg.get("model", "deepseek-chat")
-        
+
+        # 支持新的多模型配置系统
+        models = self.config.get("models", [])
+        current_model_id = self.config.get("current_model_id", "")
+
+        # 优先使用多模型配置
+        if models and current_model_id:
+            # 找到当前使用的模型
+            current_model = next((m for m in models if m.get("id") == current_model_id), None)
+            if current_model:
+                api_key = current_model.get("api_key", "")
+                base_url = current_model.get("base_url", "")
+                self.model = current_model.get("model", "deepseek-chat")
+                logging.info(f"大脑：使用多模型配置 [{current_model.get('name', 'Unknown')}]")
+            else:
+                # 如果找不到指定模型，使用旧配置
+                logging.warning(f"大脑：未找到模型 ID '{current_model_id}'，回退到旧配置")
+                api_key, base_url, self.model = self._get_legacy_config()
+        else:
+            # 回退到旧配置方式
+            api_key, base_url, self.model = self._get_legacy_config()
+
         # 使用官方原生极简的 openai sdk，只要换了 base_url 它就能无缝对接包括 DeepSeek 甚至本地 Ollama 的任何模型
         self.client = OpenAI(
             api_key=api_key,
             base_url=base_url
         )
-        
+
+        # 加载联系人专属人设配置 (V1.1 新增)
+        self.personas = self.config.get("contacts_personas", {})
+        self.default_persona = self.personas.get("default", {}).get("system_prompt", "")
+
         # 预设的基础 Persona 面具（你可以在这里自定义你的聊天风格和性格画像）
+        # 注意：现在优先使用配置文件中的人设，如果没有配置则使用这个默认值
         self.system_prompt = (
             "你是微信的主人本人。你正在通过自动化程序代替主人和他的朋友、家人、同事聊天。\n"
             "你必须严格遵守以下行为准则，确保不被发现是机器代聊：\n"
@@ -48,21 +68,119 @@ class AgentBrain:
             "7. 只输出你想发送的纯文本内容，不要包裹任何多余的解释、标点符号堆砌和 xml 代码块标记。"
         )
 
+    def _get_legacy_config(self):
+        """旧的配置读取方式，作为回退方案"""
+        llm_cfg = self.config.get("llm", {})
+        # 优先级：环境变量 > config.yaml > 默认值
+        api_key = os.environ.get("LLM_API_KEY") or llm_cfg.get("api_key", "")
+        base_url = os.environ.get("LLM_BASE_URL") or llm_cfg.get("base_url", "")
+        model = os.environ.get("LLM_MODEL") or llm_cfg.get("model", "deepseek-chat")
+        logging.info(f"大脑：使用旧配置 ({model})")
+        return api_key, base_url, model
+
     def _load_config(self, path):
         with open(path, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)
 
-    def think_and_reply(self, new_messages_context: list) -> str:
+    def _get_persona_for_contact(self, contact_name: str = None) -> str:
+        """
+        根据联系人名字获取对应的系统人设 (V1.1 新增)
+        :param contact_name: 联系人名字（支持逗号分隔的多人配置）
+        :return: 对应的人设 prompt
+        """
+        # 优先级：配置文件默认人设 > 代码硬编码默认人设
+        base_persona = self.default_persona if self.default_persona else self.system_prompt
+
+        if not contact_name:
+            logging.debug("大脑：未提供联系人名字，使用默认人设")
+            return base_persona
+
+        # 精确匹配
+        if contact_name in self.personas:
+            persona_config = self.personas[contact_name]
+            if not persona_config.get("enabled", True):
+                logging.info(f"大脑：联系人 '{contact_name}' 的人设已禁用，使用默认人设")
+                return base_persona
+
+            # 检查是否引用模板
+            if "persona_template" in persona_config:
+                template_id = persona_config["persona_template"]
+                templates = self.personas.get("templates", {})
+                if template_id in templates:
+                    template = templates[template_id]
+                    logging.info(f"大脑：为联系人 '{contact_name}' 使用模板 '{template.get('name', template_id)}'")
+                    return template.get("system_prompt", base_persona)
+                else:
+                    logging.warning(f"大脑：联系人 '{contact_name}' 引用的模板 '{template_id}' 不存在，使用默认人设")
+                    return base_persona
+            else:
+                # 使用自定义人设
+                persona = persona_config.get("system_prompt", base_persona)
+                logging.info(f"大脑：为联系人 '{contact_name}' 使用专属人设 '{persona_config.get('name', '未知')}'")
+                return persona
+
+        # 多人配置匹配：检查是否有人设配置的 aliases 字段包含当前联系人
+        import re
+        for key, persona_config in self.personas.items():
+            if key == "default" or key == "templates":
+                continue
+
+            if persona_config.get("enabled", True):
+                # 检查 aliases 字段（支持逗号分隔的多个别名）
+                aliases = persona_config.get("aliases", [])
+                if isinstance(aliases, str):
+                    aliases = [a.strip() for a in aliases.split(',')]
+
+                if contact_name in aliases:
+                    logging.info(f"大脑：联系人 '{contact_name}' 匹配到别名配置 '{key}'")
+
+                    # 检查是否引用模板
+                    if "persona_template" in persona_config:
+                        template_id = persona_config["persona_template"]
+                        templates = self.personas.get("templates", {})
+                        if template_id in templates:
+                            template = templates[template_id]
+                            return template.get("system_prompt", base_persona)
+                    else:
+                        return persona_config.get("system_prompt", base_persona)
+
+                # 模糊匹配（OCR可能识别错误）
+                # 去除空格和特殊字符进行比较
+                clean_contact = re.sub(r'[\s\-_]', '', contact_name)
+                clean_key = re.sub(r'[\s\-_]', '', key)
+
+                # 包含关系匹配
+                if clean_contact in clean_key or clean_key in clean_contact:
+                    # 检查是否引用模板
+                    if "persona_template" in persona_config:
+                        template_id = persona_config["persona_template"]
+                        templates = self.personas.get("templates", {})
+                        if template_id in templates:
+                            template = templates[template_id]
+                            logging.info(f"大脑：使用模糊匹配+模板 '{template.get('name', template_id)}' 对应联系人 '{contact_name}'")
+                            return template.get("system_prompt", base_persona)
+                    else:
+                        persona = persona_config.get("system_prompt", base_persona)
+                        logging.info(f"大脑：使用模糊匹配人设 '{key}' 对应联系人 '{contact_name}'")
+                        return persona
+
+        # 未找到匹配，使用默认人设
+        logging.debug(f"大脑：未找到联系人 '{contact_name}' 的专属人设，使用默认人设")
+        return base_persona
+
+    def think_and_reply(self, new_messages_context: list, contact_name: str = None) -> str:
         """
         接收一批从 ocr_parser 过来的增量上下文信息，推给大模型进行阅读理解和自动回复生成
         :param new_messages_context: 形如 [{"text": "在吗", "sender": "them", "is_multimodal": False}, ...]
+        :param contact_name: 当前联系人名字（用于选择专属人设）V1.1 新增
         :return: 决定发出去的最终文字
         """
         if not new_messages_context:
             return ""
 
-        # 构建标准的聊天列阵
-        messages_prompt = [{"role": "system", "content": self.system_prompt}]
+        # 根据联系人选择对应的 system_prompt (V1.1 新增)
+        persona = self._get_persona_for_contact(contact_name)
+        messages_prompt = [{"role": "system", "content": persona}]
         
         has_new_them_msg = False
         

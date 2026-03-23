@@ -44,15 +44,24 @@ class WindowManager:
         并缓存到 self.window
         """
         windows = gw.getWindowsWithTitle(self.window_title)
-        
-        # 为了避免匹配到像“微信图片”、“微信读书”等带“微信”的无关窗口
+
+        # 为了避免匹配到像"微信图片"、"微信读书"等带"微信"的无关窗口
         for w in windows:
             if w.title == self.window_title:
                 self.window = w
                 logging.info(f"窗口探测：成功找到 '{self.window_title}' 句柄:{w._hWnd}，坐标位置:({w.left}, {w.top}), 宽:{w.width}, 高:{w.height}")
                 return True
-                
+
+        # 如果精确匹配失败，尝试模糊匹配包含"微信"的窗口
+        all_windows = gw.getAllWindows()
+        for w in all_windows:
+            if w.title and "微信" in w.title and len(w.title) < 10:  # 限制标题长度，避免匹配到长标题的无关窗口
+                self.window = w
+                logging.info(f"窗口探测：模糊匹配到窗口 '{w.title}' 句柄:{w._hWnd}，坐标位置:({w.left}, {w.top}), 宽:{w.width}, 高:{w.height}")
+                return True
+
         logging.warning(f"窗口探测：彻底失联！未能找到名为 '{self.window_title}' 的活动窗口")
+        logging.warning("提示：请确保微信客户端已打开，并且窗口可见（未最小化）")
         return False
 
     def activate_window(self):

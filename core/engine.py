@@ -38,6 +38,17 @@ class WeChatEngine:
         self.action = ActionExecutor()
         self.is_running = False
 
+        # 读取工作模式配置
+        import yaml
+        try:
+            with open(config_path, 'r', encoding='utf-8') as f:
+                config = yaml.safe_load(f)
+                self.work_mode = config.get('work_mode', 'auto')  # 默认自动模式
+                log(f"[工作模式] {'自动' if self.work_mode == 'auto' else '辅助'}")
+        except Exception as e:
+            log(f"[警告] 读取工作模式配置失败，使用默认自动模式: {e}")
+            self.work_mode = 'auto'
+
     def stop(self):
         """通知引擎准备挂起（在本次循环结束后停止）"""
         self.is_running = False
@@ -153,13 +164,21 @@ class WeChatEngine:
 
                     if their_msgs:
                         log("🧠 连线大模型...")
-                        reply_text = self.brain.think_and_reply(new_msgs)
+                        reply_text = self.brain.think_and_reply(new_msgs, current_contact)
 
                         if reply_text and "..." not in reply_text[:3]:
                             log(f"🗣️ 回复：「{reply_text}」")
-                            self.action.send_message(reply_text)
-                            log("✅ 已发送，冷却 3 秒...")
-                            time.sleep(3)
+                            # 根据工作模式决定是否自动发送
+                            auto_send = (self.work_mode == 'auto')
+                            self.action.send_message(reply_text, auto_send=auto_send)
+
+                            if auto_send:
+                                log("✅ 已发送，冷却 3 秒...")
+                                time.sleep(3)
+                            else:
+                                log("✨ 辅助模式：回复已粘贴到输入框，等待手动发送...")
+                                # 辅助模式下不进行蹲守，直接关闭聊天
+                                break
 
                             # 【关键】立刻全量截图，把屏幕上所有内容（包括对方的回复）全部缓存为"已读"
                             abs_rect_refresh = self.wm.get_window_rect()
@@ -201,22 +220,30 @@ class WeChatEngine:
                         continue
 
                     log("🧠 检测到新回复，连线大模型...")
-                    reply_text = self.brain.think_and_reply(new_msgs)
+                    reply_text = self.brain.think_and_reply(new_msgs, current_contact)
 
                     if reply_text and "..." not in reply_text[:3]:
                         log(f"🗣️ 回复：「{reply_text}」")
-                        self.action.send_message(reply_text)
-                        log("✅ 已发送，冷却 3 秒...")
-                        time.sleep(3)
+                        # 根据工作模式决定是否自动发送
+                        auto_send = (self.work_mode == 'auto')
+                        self.action.send_message(reply_text, auto_send=auto_send)
 
-                        # 再次全量缓存
-                        abs_rect_refresh = self.wm.get_window_rect()
-                        if abs_rect_refresh:
-                            digest_img = self.vision.capture_region(abs_rect_refresh, chat_rect)
-                            self.parser.parse_chat_image(digest_img)
-                            log("🔄 全量缓存完毕，屏幕已标记为已读。")
+                        if auto_send:
+                            log("✅ 已发送，冷却 3 秒...")
+                            time.sleep(3)
 
-                        follow_up_start = time.time()
+                            # 再次全量缓存
+                            abs_rect_refresh = self.wm.get_window_rect()
+                            if abs_rect_refresh:
+                                digest_img = self.vision.capture_region(abs_rect_refresh, chat_rect)
+                                self.parser.parse_chat_image(digest_img)
+                                log("🔄 全量缓存完毕，屏幕已标记为已读。")
+
+                            follow_up_start = time.time()
+                        else:
+                            log("✨ 辅助模式：回复已粘贴到输入框，等待手动发送...")
+                            # 辅助模式下不进行蹲守，直接退出
+                            break
 
 
                 # 5. 蹲守结束，在会话列表中找到该联系人并点击关闭聊天

@@ -139,64 +139,92 @@ class VisionEngine:
         red_dots.sort(key=lambda p: p[1])
         return red_dots
 
-    def interactive_calibration(self, window_rect):
+    def interactive_calibration(self, window_rect, log_callback=None):
         """
         第一次启动防错校准：通过大图进行交互式的手动区域截取，引导用户标记关键 UI 坐标
+
+        Args:
+            window_rect: 微信窗口的矩形坐标
+            log_callback: 可选的日志回调函数，用于实时向UI发送进度信息
         """
+        # 使用提供的日志回调函数，如果没有则使用默认的 logging
+        log = log_callback if log_callback else lambda msg: logging.info(msg)
+
         if not window_rect:
-            logging.error("视界：无法获取微信窗口进行校准！请先启动或排查 window_manager。")
+            log("❌ 无法获取微信窗口进行校准！请先启动或排查 window_manager。")
             return False
 
-        logging.info("🌟 [强硬引导] 准备进入首次视觉校准交互...")
-        logging.info("提示：请在弹出的【大图图像窗口】中，依次用鼠标按住【完整包住】所需区域拖拽框选。")
-        logging.info("选好框后，按下【回车键】或【空格键】确认。如果框错了，按【c】键重置清空框然后重画！")
-        time.sleep(2)  # 给用户2秒钟阅读这个提示
+        log("🚀 开始坐标校准流程...")
+        log("📋 校准操作指南：")
+        log("  1. 会弹出3个图片窗口，请用鼠标框选指定的区域")
+        log("  2. 按住鼠标左键拖动来画框，框选好后松开")
+        log("  3. 按【回车键】或【空格键】确认当前选择")
+        log("  4. 如果框选错误，按【C】键清空重新选择")
+        time.sleep(3)  # 给用户3秒钟阅读这个提示
         
         # 抓取整个微信主窗的快照，用于交互式展示
+        log("📸 正在截取微信窗口...")
         full_monitor = {
             "left": window_rect["left"],
             "top": window_rect["top"],
             "width": window_rect["width"],
             "height": window_rect["height"]
         }
-        img_full_bgra = np.array(self.sct.grab(full_monitor))
+
+        # 使用临时创建的 mss 实例，保证线程安全
+        with mss.mss() as sct:
+            img_full_bgra = np.array(sct.grab(full_monitor))
         img_full_bgr = cv2.cvtColor(img_full_bgra, cv2.COLOR_BGRA2BGR)
+        log("✅ 截图完成！现在开始框选坐标...")
         
         # 步骤 1：让用户圈出【左侧会话列表】
+        log("🎯 步骤 1/3：请框选【左侧会话列表区域】")
+        log("   这是显示所有聊天联系人的区域，包含头像和名字")
         roi_session = cv2.selectROI(
-            "1/3 Calibration: Select LEFT SESSION LIST (Enter to confirm / 'C' to reset)", 
+            "Step 1/3 - Select Session List (Enter Confirm / C Reset)",
             img_full_bgr, showCrosshair=True, fromCenter=False
         )
-        cv2.destroyWindow("1/3 Calibration: Select LEFT SESSION LIST (Enter to confirm / 'C' to reset)")
+        cv2.destroyWindow("Step 1/3 - Select Session List (Enter Confirm / C Reset)")
         if roi_session == (0,0,0,0):
-             logging.warning("视界：用户放弃了会话列表区域的框选校准。")
+             log("❌ 用户取消了会话列表区域的框选")
              return False
+        log("✅ 步骤1完成！会话列表区域已记录")
         
         # 步骤 2：聊天气泡记录详情大区 (最核心解析文字的地方)
+        log("🎯 步骤 2/3：请框选【右侧聊天内容区域】")
+        log("   这是显示聊天消息内容的区域，包含发送的消息气泡")
         roi_chat = cv2.selectROI(
-            "2/3 Calibration: Select RIGHT CHAT HISTORY (Enter to confirm / 'C' to reset)", 
+            "Step 2/3 - Select Chat Content (Enter Confirm / C Reset)",
             img_full_bgr, showCrosshair=True, fromCenter=False
         )
-        cv2.destroyWindow("2/3 Calibration: Select RIGHT CHAT HISTORY (Enter to confirm / 'C' to reset)")
+        cv2.destroyWindow("Step 2/3 - Select Chat Content (Enter Confirm / C Reset)")
         if roi_chat == (0,0,0,0):
+             log("❌ 用户取消了聊天内容区域的框选")
              return False
+        log("✅ 步骤2完成！聊天内容区域已记录")
              
         # 步骤 3：底部聊天输入框圈点
+        log("🎯 步骤 3/3：请框选【底部输入框区域】")
+        log("   这是最底部的输入框，用于输入和发送消息")
         roi_input = cv2.selectROI(
-            "3/3 Calibration: Select BOTTOM INPUT BOX (Enter to confirm / 'C' to reset)", 
+            "Step 3/3 - Select Input Box (Enter Confirm / C Reset)",
             img_full_bgr, showCrosshair=True, fromCenter=False
         )
-        cv2.destroyWindow("3/3 Calibration: Select BOTTOM INPUT BOX (Enter to confirm / 'C' to reset)")
+        cv2.destroyWindow("Step 3/3 - Select Input Box (Enter Confirm / C Reset)")
         if roi_input == (0,0,0,0):
+             log("❌ 用户取消了输入框区域的框选")
              return False
+        log("✅ 步骤3完成！输入框区域已记录")
 
         # 计算输入框的几何中心点
         input_center_x = roi_input[0] + roi_input[2] // 2
         input_center_y = roi_input[1] + roi_input[3] // 2
 
         # 写入配置文件并且保存注释不被抹杀
+        log("💾 正在保存校准数据到配置文件...")
         self._save_calibration_to_yaml(roi_session, roi_chat, (input_center_x, input_center_y))
-        logging.info("✅ 视界：人工眼球校准完结，新的偏移坐标已安全覆盖保存到 config.yaml！")
+        log("🎉 校准完成！所有坐标已保存到 config.yaml")
+        log("✅ 现在可以启动 AI 助手了")
         return True
 
     def _save_calibration_to_yaml(self, session, chat, input_center):

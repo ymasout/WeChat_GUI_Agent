@@ -41,36 +41,45 @@ class ActionExecutor:
         time.sleep(0.15)
         self.mouse.click(Button.left, 2)
         
-    def send_message(self, text: str):
+    def send_message(self, text: str, auto_send: bool = True):
         """
         向当前「已处于聚焦状态」的微信输入框砸入一段回答。
         完美链路设计：文本压入剪贴板 -> Ctrl+V 粘贴 -> Enter 回车
         （为什么不能直接用 keyboard 输出一个个字母？因为中文和 emoji 以及特殊排版用按键精灵容易造成乱码）
+
+        :param text: 要发送的消息文本
+        :param auto_send: 是否自动发送，True 为自动发送，False 为只粘贴不发送（辅助模式）
         """
         if not text:
             return
-            
-        logging.info("👊 物理执行层：接到任务！准备接管剪贴板并释放指令...")
-        
+
+        mode_desc = "自动发送" if auto_send else "辅助模式（仅粘贴）"
+        logging.info(f"[物理执行层] 接到任务！准备接管剪贴板并释放指令 [{mode_desc}]...")
+
         # 1. 记忆倾印：把大脑产出的回复压入操作系统的底层剪贴板
         pyperclip.copy(text)
-        
+
         # 留白时间 0.3 秒，模拟人类目光正在从聊天记录往下看输入框的眼动空隙
         time.sleep(0.3)
-        
+
         # 2. 经典连招组合拳：Ctrl + V
         with self.keyboard.pressed(Key.ctrl):
             self.keyboard.press('v')
             self.keyboard.release('v')
-            
+
+        # 如果是辅助模式，只粘贴不发送
+        if not auto_send:
+            logging.info(f"[物理执行层] 辅助模式 - 内容已粘贴到输入框，等待用户手动发送。字数统计：{len(text)}")
+            return
+
         # 留白时间 0.4 秒，模拟人类打完字大脑核对内容有没有病句的短暂停顿（强行防风控）
         time.sleep(0.4)
-        
+
         # 3. 敲下回车键，让这一切物理发生！
         self.keyboard.press(Key.enter)
         self.keyboard.release(Key.enter)
-        
-        logging.info(f"👊 物理执行层：一套连招 (Ctrl+V + Enter) 已成功命中输入框！字数统计：{len(text)}")
+
+        logging.info(f"[物理执行层] 一套连招 (Ctrl+V + Enter) 已成功命中输入框！字数统计：{len(text)}")
 
     def press_escape(self):
         """
