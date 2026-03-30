@@ -152,6 +152,7 @@ class WeChatEngine:
                 # 4. 进入跟踪模式：截图 → 识别 → 回复 → 全量缓存 → 蹲守
                 log("🔁 进入跟踪模式，蹲守 %d 秒..." % FOLLOW_UP_TIMEOUT)
                 follow_up_start = time.time()
+                assist_mode_triggered = False
 
                 # 第一次扫描聊天内容
                 abs_rect = self.wm.get_window_rect()
@@ -176,9 +177,8 @@ class WeChatEngine:
                                 log("✅ 已发送，冷却 3 秒...")
                                 time.sleep(3)
                             else:
-                                log("✨ 辅助模式：回复已粘贴到输入框，等待手动发送...")
-                                # 辅助模式下不进行蹲守，直接关闭聊天
-                                break
+                                log("✨ 辅助模式：草稿已备好，等待您检阅补充并手动发送...")
+                                assist_mode_triggered = True
 
                             # 【关键】立刻全量截图，把屏幕上所有内容（包括对方的回复）全部缓存为"已读"
                             abs_rect_refresh = self.wm.get_window_rect()
@@ -187,6 +187,11 @@ class WeChatEngine:
                                 self.parser.parse_chat_image(digest_img)
                                 log("🔄 全量缓存完毕，屏幕已标记为已读。")
 
+                            if assist_mode_triggered:
+                                log("⏳ 辅助模式将为您预留 15 秒检查时间，随后自动关闭当前聊天框。")
+                                self._interruptible_sleep(15)
+                                # 此处原有的 continue 已移除，允许程序顺流而下自动执行第 5 步关闭操作
+
                             follow_up_start = time.time()
                         else:
                             log("🧠 大模型判断无需回复。")
@@ -194,7 +199,7 @@ class WeChatEngine:
                         log("⚠️ 空包弹：未提取到对方的新消息。")
 
                 # 蹲守循环：每 3 秒扫一次，发现新消息就回复，否则超时退出
-                while True:
+                while not assist_mode_triggered:
                     if not self.is_running:
                         break
 
@@ -231,22 +236,28 @@ class WeChatEngine:
                         if auto_send:
                             log("✅ 已发送，冷却 3 秒...")
                             time.sleep(3)
-
-                            # 再次全量缓存
-                            abs_rect_refresh = self.wm.get_window_rect()
-                            if abs_rect_refresh:
-                                digest_img = self.vision.capture_region(abs_rect_refresh, chat_rect)
-                                self.parser.parse_chat_image(digest_img)
-                                log("🔄 全量缓存完毕，屏幕已标记为已读。")
-
-                            follow_up_start = time.time()
                         else:
-                            log("✨ 辅助模式：回复已粘贴到输入框，等待手动发送...")
-                            # 辅助模式下不进行蹲守，直接退出
-                            break
+                            log("✨ 辅助模式：草稿已备好，等待您检阅补充并手动发送...")
+                            assist_mode_triggered = True
+
+                        # 再次全量缓存
+                        abs_rect_refresh = self.wm.get_window_rect()
+                        if abs_rect_refresh:
+                            digest_img = self.vision.capture_region(abs_rect_refresh, chat_rect)
+                            self.parser.parse_chat_image(digest_img)
+                            log("🔄 全量缓存完毕，屏幕已标记为已读。")
+
+                        if assist_mode_triggered:
+                            log("⏳ 辅助模式将为您预留 15 秒检查时间，随后自动关闭当前聊天框。")
+                            self._interruptible_sleep(15)
+                            break # 跳出蹲守，进入下方的关闭聊天操作
+
+                        follow_up_start = time.time()
 
 
                 # 5. 蹲守结束，在会话列表中找到该联系人并点击关闭聊天
+                # （辅助模式现在也将执行关闭聊天，以防随后扫描红点时因未失焦而误关闭）
+
                 abs_rect = self.wm.get_window_rect()
                 if abs_rect and current_contact:
                     log(f"🔍 正在会话列表中搜索「{current_contact}」的位置...")

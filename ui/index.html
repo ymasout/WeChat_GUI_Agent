@@ -8,1350 +8,390 @@
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
         :root {
-            /* 🎨 一体化无边框设计 - 高级浅色渐变背景 */
-            --bg-unified: linear-gradient(135deg, #fafbff 0%, #f8f9fc 25%, #f0f4f8 50%, #f5f7fa 75%, #fafbff 100%);
-            --bg-texture:
-                radial-gradient(ellipse at 20% 20%, rgba(99, 102, 241, 0.03) 0%, transparent 50%),
-                radial-gradient(ellipse at 80% 80%, rgba(139, 92, 246, 0.02) 0%, transparent 50%),
-                radial-gradient(ellipse at 40% 60%, rgba(236, 72, 153, 0.02) 0%, transparent 50%),
-                linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0.1) 100%);
+            /* 暗色玻璃拟态 (Dark Glassmorphism) 主题 */
+            --bg-unified: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --bg-texture: radial-gradient(ellipse at 50% -20%, rgba(124, 58, 237, 0.15), transparent 60%);
 
-            /* 浮动玻璃拟态效果 - 统一背景 */
-            --glass-bg: rgba(255, 255, 255, 0.35);
-            --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
-            --glass-blur: blur(20px);
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #64748b;
 
-            /* 文字颜色 - 适配浅色背景 */
-            --text-primary: #1a1a2e;
-            --text-secondary: #4a5568;
-            --text-muted: #718096;
-
-            /* 强调色 - 现代化配色 */
-            --accent-blue: #6366f1;
+            --accent-blue: #3b82f6;
             --accent-green: #10b981;
             --accent-orange: #f59e0b;
             --accent-pink: #ec4899;
             --accent-purple: #8b5cf6;
-            --accent-teal: #14b8a6;
             --accent-red: #ef4444;
 
-            /* 浮动卡片效果 */
-            --card-bg: rgba(255, 255, 255, 0.45);
-            --card-border: rgba(255, 255, 255, 0.7);
-            --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-            --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --bg-surface: rgba(30, 41, 59, 0.5);
+            --bg-hover: rgba(51, 65, 85, 0.6);
+            --bg-active: rgba(59, 130, 246, 0.2);
+            --bg-card: rgba(15, 23, 42, 0.6);
 
-            /* 表面背景 */
-            --bg-surface: rgba(255, 255, 255, 0.3);
-            --bg-hover: rgba(255, 255, 255, 0.5);
-            --bg-active: rgba(99, 102, 241, 0.08);
-            --bg-chip: rgba(99, 102, 241, 0.04);
-            --bg-card: rgba(255, 255, 255, 0.5);
+            --border-light: rgba(255, 255, 255, 0.08);
+            --border-medium: rgba(255, 255, 255, 0.12);
+            --border-dark: rgba(255, 255, 255, 0.2);
 
-            /* 边框系统 */
-            --border-light: rgba(255, 255, 255, 0.6);
-            --border-medium: rgba(255, 255, 255, 0.8);
-            --border-dark: rgba(255, 255, 255, 0.9);
-
-            /* 阴影系统 */
-            --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 16px 48px rgba(0, 0, 0, 0.12);
-            --shadow-soft: 0 2px 12px rgba(0, 0, 0, 0.08);
-
-            /* 渐变 */
-            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-
-            /* 尺寸系统 */
-            --radius-sm: 10px;
-            --radius: 14px;
-            --radius-lg: 18px;
+            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            
+            --radius-sm: 8px;
+            --radius: 12px;
+            --radius-lg: 16px;
             --radius-xl: 24px;
-            --radius-pill: 50px;
+            --radius-pill: 9999px;
 
-            /* 过渡效果 */
             --transition-fast: 0.15s ease;
-            --transition-normal: 0.25s ease;
-            --transition-smooth: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-
+        html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; padding: 0; }
         body {
-            font-family: 'Inter', 'PingFang SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
+            font-family: 'Inter', system-ui, sans-serif;
             background: var(--bg-unified);
             color: var(--text-primary);
-            height: 100vh;
             display: flex;
-            flex-direction: column;
-            overflow: hidden;
             user-select: none;
-            border-radius: var(--radius-xl);
             position: relative;
         }
-
-        /* 统一背景纹理层 */
+        /* 全局自定义滚动条 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
         body::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--bg-texture);
-            pointer-events: none;
-            opacity: 0.8;
-            z-index: 0;
+            content: ''; position: absolute; inset: 0;
+            background: var(--bg-texture); pointer-events: none; z-index: -1;
         }
 
-        /* 微妙噪点纹理 */
-        body::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-            opacity: 0.03;
-            pointer-events: none;
-            mix-blend-mode: overlay;
-            z-index: 0;
-        }
-
-        /* ===== 顶部状态栏 - 浮动透明设计 ===== */
-        .top-bar {
-            height: 56px;
-            background: transparent;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            flex-shrink: 0;
-            -webkit-app-region: drag;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* 按钮区排除拖拽 */
-        .top-bar .top-right,
-        .top-bar button { -webkit-app-region: no-drag; }
-
-        /* ===== 高级窗口控制按钮 - macOS风格 ===== */
-        .win-btn {
-            width: 13px;
-            height: 13px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            border: none;
-            transition: all var(--transition-fast);
-            position: relative;
-        }
-        .win-btn svg {
-            width: 0;
-            height: 0;
-            opacity: 0;
-            transition: all var(--transition-fast);
-        }
-        /* hover时显示图标 */
-        .win-btn:hover svg {
-            width: 8px;
-            height: 8px;
-            opacity: 1;
-        }
-        .win-btn svg {
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        /* macOS风格的窗口控制按钮颜色 */
-        .win-btn.close {
-            background: #ff5f57;
-            box-shadow: 0 0 0 1px #e0443e, inset 0 0 0 1px rgba(255,255,255,0.2);
-        }
-        .win-btn.close:hover {
-            background: #ff4136;
-            box-shadow: 0 0 0 1px #cc342d, inset 0 0 0 1px rgba(255,255,255,0.2);
-        }
-        .win-btn.minimize {
-            background: #ffbd2e;
-            box-shadow: 0 0 0 1px #dea123, inset 0 0 0 1px rgba(255,255,255,0.2);
-            margin-left: 8px;
-        }
-        .win-btn.minimize:hover {
-            background: #ffaa00;
-            box-shadow: 0 0 0 1px #d49100, inset 0 0 0 1px rgba(255,255,255,0.2);
-        }
-
-        .top-left {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* ===== 精致Logo设计 - 高级感 ===== */
-        .app-logo {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--radius-lg);
-            background: var(--gradient-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            box-shadow: var(--shadow-soft);
-            transition: all var(--transition-normal);
-        }
-        .app-logo::after {
-            content: '';
-            width: 24px;
-            height: 24px;
-            border-radius: var(--radius);
-            background: var(--bg-card);
-            border: 1px solid var(--border-light);
-        }
-        .app-logo.running {
-            animation: logoPulse 2s ease-in-out infinite;
-            box-shadow: 0 0 20px rgba(102,126,234,0.3);
-        }
-        .app-logo:hover {
-            transform: scale(1.05);
-            box-shadow: var(--shadow-md);
-        }
-
-        @keyframes logoPulse {
-            0%, 100% {
-                box-shadow: 0 0 15px rgba(102,126,234,0.2);
-            }
-            50% {
-                box-shadow: 0 0 25px rgba(102,126,234,0.4);
-            }
-        }
-
-        .status-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .status-label {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: -0.2px;
-        }
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-muted);
-            transition: all var(--transition-normal);
-        }
-        .status-dot.online {
-            background: var(--accent-green);
-            box-shadow: 0 0 8px rgba(52,199,89,0.4);
-            animation: statusPulse 2s ease-in-out infinite;
-        }
-        @keyframes statusPulse {
-            0%,100% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            50% {
-                opacity: 0.7;
-                transform: scale(1.1);
-            }
-        }
-
-        .top-right {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .icon-btn {
-            width: 36px;
-            height: 36px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            cursor: pointer;
-            transition: all var(--transition-smooth);
-            color: var(--text-secondary);
-            border: none;
-            background: var(--card-bg);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            border: 1px solid var(--card-border);
-            box-shadow: var(--shadow-sm);
-        }
-        .icon-btn:hover {
-            background: var(--bg-hover);
-            transform: scale(1.05) translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        .icon-btn svg {
-            width: 18px; height: 18px;
-            fill: none; stroke: currentColor;
-            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-        }
-
-        /* ===== 主内容区域 - 一体化透明设计 ===== */
-        .content-area {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            scroll-behavior: smooth;
-            background: transparent;
-        }
-        .content-area::-webkit-scrollbar {
-            width: 6px;
-        }
-        .content-area::-webkit-scrollbar-track {
-            background: transparent;
-        }
-        .content-area::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.1);
-            border-radius: 3px;
-        }
-        .content-area::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.2);
-        }
-
-        /* ===== 日志条目 - 浮动卡片设计 ===== */
-        .log-entry {
-            font-size: 14px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            box-shadow: var(--card-shadow);
-            opacity: 0;
-            transform: translateY(8px);
-            animation: fadeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            transition: all var(--transition-smooth);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        .log-entry:last-child { margin-bottom: 0; }
-        .log-entry:hover {
-            border-color: var(--border-medium);
-            box-shadow: var(--card-hover-shadow);
-            transform: translateY(-2px);
-        }
-
-        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-
-        /* ===== 日志类型标记 - 精致设计 ===== */
-        .log-entry .log-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border-radius: var(--radius-sm);
-            text-align: center;
-            line-height: 20px;
-            font-size: 10px;
-            margin-right: 8px;
-            vertical-align: middle;
-            font-weight: 700;
-        }
-        .log-icon.info  {
-            background: var(--accent-teal);
-            color: white;
-        }
-        .log-icon.ok    {
-            background: var(--accent-green);
-            color: white;
-        }
-        .log-icon.warn  {
-            background: var(--accent-orange);
-            color: white;
-        }
-        .log-icon.reply {
-            background: var(--accent-purple);
-            color: white;
-        }
-        .log-icon.find  {
-            background: var(--accent-pink);
-            color: white;
-        }
-
-        .log-entry.type-system {
-            text-align: center;
-            color: var(--text-muted);
-            font-size: 12px;
-            background: transparent;
-            border: none;
-            box-shadow: none;
-            padding: 10px 0;
-            margin-bottom: 16px;
-        }
-        .log-entry.type-system:hover {
-            box-shadow: none;
-            border-color: transparent;
-        }
-
-        /* ===== 底部控制条 - 浮动透明设计 ===== */
-        .action-bar {
-            padding: 14px 16px 16px;
-            background: transparent;
-            border-top: none;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10;
-        }
-
-        /* ===== 启动/停止按钮 - 精致设计 ===== */
-        .btn-launch {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 11px 20px;
-            border: none;
-            border-radius: var(--radius-lg);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            outline: none;
-            white-space: nowrap;
-            letter-spacing: -0.1px;
-            position: relative;
-            overflow: hidden;
-        }
-        .btn-launch::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(rgba(255,255,255,0.2), rgba(255,255,255,0));
-            opacity: 0;
-            transition: opacity var(--transition-fast);
-        }
-        .btn-launch:hover::before {
-            opacity: 1;
-        }
-        .btn-launch svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-            stroke: none;
-            position: relative;
-            z-index: 1;
-        }
-        .btn-launch span {
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-launch.start {
-            background: var(--accent-blue);
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
-        .btn-launch.start:hover {
-            background: #5558e6;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-        .btn-launch.start:active {
-            transform: scale(0.98);
-        }
-
-        .btn-launch.stop {
-            background: var(--accent-pink);
-            color: white;
-            box-shadow: var(--shadow-md);
-        }
-        .btn-launch.stop:hover {
-            background: #f0407a;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* ===== 芯片选择器 - 浮动设计 ===== */
-        .chip {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 8px 14px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-pill);
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            cursor: default;
-            white-space: nowrap;
-            transition: all var(--transition-smooth);
-            box-shadow: var(--shadow-sm);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        .chip:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-medium);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        .chip svg {
-            width: 16px;
-            height: 16px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        .chip .chip-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            box-shadow: 0 0 6px rgba(0,122,255,0.3);
-        }
-        .chip .chip-wechat {
-            width: 18px;
-            height: 18px;
-        }
-
-        /* 微信绿色小图标 */
-        .wechat-icon {
-            width: 20px; height: 20px;
-            border-radius: 50%;
-            background: #07c160;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .wechat-icon svg { width: 12px; height: 12px; fill: #fff; stroke: none; }
-
-        .chip .arrow { font-size: 10px; color: var(--text-muted); margin-left: 2px; }
-
-        /* ===== 工作模式开关 - 横向设计 ===== */
-        .mode-toggle {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            backdrop-filter: var(--glass-blur);
-            -webkit-backdrop-filter: var(--glass-blur);
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .mode-toggle:hover {
-            background: var(--bg-hover);
-            transform: translateY(-1px);
-            box-shadow: var(--card-hover-shadow);
-        }
-        .toggle-text-left,
-        .toggle-text-right {
-            font-size: 12px;
-            font-weight: 500;
-            transition: color var(--transition-fast);
-        }
-        /* 自动模式状态 */
-        .mode-toggle.auto .toggle-text-left {
-            color: var(--accent-green);
-            font-weight: 600;
-        }
-        .mode-toggle.auto .toggle-text-right {
-            color: var(--text-muted);
-        }
-        /* 辅助模式状态 */
-        .mode-toggle.assist .toggle-text-left {
-            color: var(--text-muted);
-        }
-        .mode-toggle.assist .toggle-text-right {
-            color: var(--accent-orange);
-            font-weight: 600;
-        }
-        .toggle-slider {
-            width: 40px;
-            height: 20px;
-            background: var(--accent-green);
-            border-radius: 10px;
-            position: relative;
-            transition: all var(--transition-smooth);
-            flex-shrink: 0;
-        }
-        .toggle-slider::before {
-            content: '';
-            position: absolute;
-            width: 16px;
-            height: 16px;
-            background: white;
-            border-radius: 50%;
-            top: 2px;
-            left: 2px;
-            transition: all var(--transition-smooth);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-        /* 辅助模式 - 橙色状态，滑块在右侧 */
-        .mode-toggle.assist .toggle-slider {
-            background: var(--accent-orange);
-        }
-        .mode-toggle.assist .toggle-slider::before {
-            left: 22px;
-        }
-        /* 自动模式 - 绿色状态，滑块在左侧 */
-        .mode-toggle.auto .toggle-slider {
-            background: var(--accent-green);
-        }
-        .mode-toggle.auto .toggle-slider::before {
-            left: 2px;
-        }
-
-        /* ===== 底部Tab导航 - 浮动透明设计 ===== */
-        .tab-nav {
-            height: 56px;
-            background: transparent;
-            border-top: none;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            flex-shrink: 0;
-            position: relative;
-            z-index: 10;
-        }
-        .tab-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 4px;
-            cursor: pointer;
-            padding: 6px 16px;
-            border-radius: var(--radius);
-            transition: all var(--transition-smooth);
-            position: relative;
-        }
-        .tab-item:hover {
-            background: var(--bg-hover);
-            transform: translateY(-1px);
-        }
-        .tab-item svg {
-            width: 22px;
-            height: 22px;
-            fill: none;
-            stroke: var(--text-muted);
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            transition: all var(--transition-fast);
-        }
-        .tab-item span {
-            font-size: 11px;
-            color: var(--text-muted);
-            font-weight: 500;
-            transition: all var(--transition-fast);
-        }
-        .tab-item.active {
-            background: var(--bg-active);
-        }
-        .tab-item.active svg {
-            stroke: var(--accent-blue);
-        }
-        .tab-item.active span {
-            color: var(--accent-blue);
-            font-weight: 600;
-        }
-        /* 激活指示器 */
-        .tab-item.active::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 2px;
-            background: var(--accent-blue);
-            border-radius: 1px;
-        }
-
-        /* ===== 其他面板 ===== */
-        .panel { display: none; flex-direction: column; height: 100%; }
-        .panel.active { display: flex; }
-        .placeholder-box {
-            flex: 1; display: flex; flex-direction: column;
-            align-items: center; justify-content: center; gap: 10px; color: var(--text-muted);
-        }
-        .placeholder-box svg { width: 48px; height: 48px; stroke: var(--text-muted); fill: none; stroke-width: 1.2; opacity: 0.4; stroke-linecap: round; stroke-linejoin: round; }
-        .placeholder-box .ph-t { font-size: 15px; font-weight: 600; color: var(--text-secondary); }
-        .placeholder-box .ph-d { font-size: 12px; }
-
-        /* ===== 配置卡片 - 浮动设计 ===== */
-        .config-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: var(--radius-lg);
-            margin-bottom: 16px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-            transition: all var(--transition-smooth);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-        }
-        .config-card:hover {
-            box-shadow: var(--card-hover-shadow);
-            border-color: var(--border-medium);
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 14px 18px;
-            border-bottom: 1px solid var(--border-light);
-            background: var(--bg-surface);
-        }
-        .card-header svg {
-            width: 18px;
-            height: 18px;
-            fill: none;
-            stroke: var(--accent-blue);
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        .card-header span {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            letter-spacing: -0.1px;
-        }
-
-        .card-body {
-            padding: 16px;
-        }
-
-        .form-group {
-            margin-bottom: 14px;
-        }
-        .form-group:last-child {
-            margin-bottom: 0;
-        }
-        .form-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            margin-bottom: 6px;
-            letter-spacing: -0.1px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 10px 14px;
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius);
-            font-size: 14px;
-            color: var(--text-primary);
-            background: var(--bg-surface);
-            transition: all var(--transition-fast);
-            outline: none;
-        }
-        .form-input:focus {
-            border-color: var(--accent-blue);
-            background: var(--bg-card);
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
-        }
-        .form-input::placeholder {
-            color: var(--text-muted);
-        }
-
-        .input-with-toggle {
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-        .input-with-toggle .form-input {
-            padding-right: 40px;
-        }
-        .toggle-btn {
-            position: absolute;
-            right: 8px;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: none;
-            border: none;
-            cursor: pointer;
-            color: var(--text-muted);
-            transition: color 0.15s;
-        }
-        .toggle-btn:hover {
-            color: var(--text-secondary);
-        }
-        .toggle-btn svg {
-            width: 16px; height: 16px;
-            fill: none; stroke: currentColor;
-            stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
-        }
-
-        /* ===== 滑块组件 - 精致设计 ===== */
-        .slider {
-            width: 100%;
-            height: 6px;
-            background: var(--border-light);
-            border-radius: 3px;
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-        }
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: var(--accent-blue);
-            cursor: pointer;
-            box-shadow: 0 2px 6px rgba(0,122,255,0.2);
-            transition: all var(--transition-fast);
-        }
-        .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.1);
-            box-shadow: 0 2px 8px rgba(0,122,255,0.3);
-        }
-
-        .form-hint {
-            display: block;
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-top: 4px;
-        }
-
-        .required {
-            color: var(--accent-red);
-            font-weight: 600;
-        }
-
-        /* ===== 下拉选择框 - 精致设计 ===== */
-        .form-select {
-            width: 100%;
-            padding: 10px 14px;
-            padding-right: 32px;
-            border: 1px solid var(--border-medium);
-            border-radius: var(--radius);
-            font-size: 14px;
-            color: var(--text-primary);
-            background: var(--bg-surface);
-            transition: all var(--transition-fast);
-            outline: none;
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2386868b' d='M6 8.5L2.5 5h7z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-        }
-        .form-select:focus {
-            border-color: var(--accent-blue);
-            background-color: var(--bg-card);
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
-        }
-        .form-select:hover {
-            border-color: var(--border-dark);
-        }
-
-        .model-info {
-            margin-top: 12px;
-            padding: 10px 12px;
-            background: var(--bg-chip);
-            border-radius: 8px;
-            font-size: 12px;
-            color: var(--text-secondary);
-            border: 1px solid var(--border-light);
-        }
-        .model-info strong {
-            color: var(--text-primary);
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        /* 校准状态 */
-        .calibration-status {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px;
-            background: var(--bg-chip);
-            border-radius: 8px;
-            margin-bottom: 12px;
-        }
-        .status-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: var(--border-light);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-muted);
-            flex-shrink: 0;
-        }
-        .status-icon.ok {
-            background: #d1fae5;
-            color: #059669;
-        }
-        .status-icon.error {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-        .status-info {
-            flex: 1;
-        }
-        .status-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-        .status-desc {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        /* ===== 校准按钮 - 精致设计 ===== */
-        .btn-calibrate {
-            width: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 11px 16px;
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            box-shadow: var(--shadow-soft);
-        }
-        .btn-calibrate:hover {
-            background: #0062cc;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        .btn-calibrate svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-            stroke: none;
-        }
-
-        /* ===== 操作按钮 - 精致设计 ===== */
-        .action-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        .btn-save, .btn-reset {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            padding: 11px 16px;
-            border: none;
-            border-radius: var(--radius);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all var(--transition-fast);
-            letter-spacing: -0.1px;
-        }
-        .btn-save {
-            background: var(--accent-green);
-            color: white;
-            box-shadow: var(--shadow-soft);
-        }
-        .btn-save:hover {
-            background: #28a745;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-md);
-        }
-        .btn-reset {
-            background: var(--bg-surface);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-medium);
-        }
-        .btn-reset:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            transform: translateY(-1px);
-        }
-        .btn-save svg, .btn-reset svg {
-            width: 16px;
-            height: 16px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        /* ===== 自定义弹窗 - 高级感设计 ===== */
-        .custom-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+        /* 侧边栏 */
+        .sidebar {
+            width: 240px; flex-shrink: 0;
+            background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-        }
-        .custom-modal.active {
+            border-right: 1px solid var(--border-light);
             display: flex;
+            flex-direction: column;
+            padding: 20px 14px 16px;
+            z-index: 10;
+            -webkit-app-region: drag;
         }
-        .modal-content {
-            background: var(--bg-card);
-            border-radius: var(--radius-xl);
-            padding: 24px;
-            min-width: 300px;
-            max-width: 380px;
-            box-shadow: var(--shadow-xl);
-            border: 1px solid var(--border-light);
-            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px) scale(0.98);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-        .modal-title {
-            font-size: 17px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 12px;
-            letter-spacing: -0.2px;
-        }
-        .modal-message {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            line-height: 1.5;
-            white-space: pre-line;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 10px;
-            justify-content: flex-end;
-        }
-        .modal-btn {
-            padding: 10px 18px;
-            border-radius: var(--radius);
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            transition: all var(--transition-fast);
-            letter-spacing: -0.1px;
-        }
-        .modal-btn.primary {
-            background: var(--accent-blue);
-            color: white;
-        }
-        .modal-btn.primary:hover {
-            background: #0062cc;
-            transform: translateY(-1px);
-        }
-        .modal-btn.secondary {
-            background: var(--bg-surface);
-            color: var(--text-secondary);
-            border: 1px solid var(--border-medium);
-        }
-        .modal-btn.secondary:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-        }
+        .sidebar > * { -webkit-app-region: no-drag; }
 
-        /* ===== 模型列表样式 ===== */
-        .model-item {
-            background: var(--bg-surface);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius);
-            padding: 14px 16px;
-            margin-bottom: 10px;
+        .brand {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 32px; padding: 0 8px;
+        }
+        .app-logo {
+            width: 36px; height: 36px; border-radius: 10px;
+            background: #07c160; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 15px rgba(7, 193, 96, 0.2);
             transition: all var(--transition-smooth);
-            display: flex;
-            align-items: center;
-            gap: 12px;
         }
-        .model-item:last-child {
-            margin-bottom: 0;
-        }
-        .model-item:hover {
-            border-color: var(--border-medium);
-            box-shadow: var(--shadow-sm);
-        }
-        .model-item.current {
-            background: var(--bg-active);
-            border-color: var(--accent-blue);
-        }
-        .model-item .model-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: var(--radius-sm);
-            background: var(--accent-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: white;
-            font-weight: 600;
-            font-size: 14px;
-        }
-        .model-item .model-info {
-            flex: 1;
-        }
-        .model-item .model-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-        .model-item .model-provider {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        .model-item .model-badge {
-            padding: 4px 8px;
-            background: var(--accent-blue);
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
-            flex-shrink: 0;
-        }
-        .model-item .model-actions {
-            display: flex;
-            gap: 6px;
-            flex-shrink: 0;
-        }
-        .model-item .btn-icon-small {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--radius-sm);
-            background: transparent;
-            border: 1px solid var(--border-light);
-            color: var(--text-secondary);
-            cursor: pointer;
+        .app-logo svg { width: 22px; height: 22px; }
+        .app-logo.running { animation: logoPulse 2s infinite; }
+        @keyframes logoPulse { 50% { box-shadow: 0 0 25px rgba(7, 193, 96, 0.6); } }
+        
+        .brand-text { flex: 1; }
+        .brand-title { font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
+        .status-group { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); }
+        .status-dot.online { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
+        .status-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+
+        .tab-nav { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+        .tab-item {
+            display: flex; align-items: center; gap: 12px;
+            padding: 12px 16px; border-radius: var(--radius);
+            color: var(--text-secondary); cursor: pointer;
             transition: all var(--transition-fast);
         }
-        .model-item .btn-icon-small:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
-            border-color: var(--border-medium);
-        }
-        .model-item .btn-icon-small svg {
-            width: 14px;
-            height: 14px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 1.8;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-        .model-item .btn-icon-small.delete:hover {
-            background: #fee2e2;
-            color: var(--accent-pink);
-            border-color: #fecaca;
-        }
+        .tab-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .tab-item.active { background: var(--bg-active); color: var(--accent-blue); font-weight: 600; }
+        .tab-item svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
 
-        /* 添加模型按钮 */
+        .btn-launch {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 14px; border-radius: var(--radius-lg); border: none;
+            font-size: 15px; font-weight: 600; cursor: pointer; color: white;
+            transition: all var(--transition-smooth); margin-top: auto;
+        }
+        .btn-launch.start { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
+        .btn-launch.start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.6); }
+        .btn-launch.stop { background: var(--accent-pink); box-shadow: 0 4px 15px rgba(236,72,153,0.4); }
+        .btn-launch.stop:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236,72,153,0.6); }
+        .btn-launch svg { width: 18px; height: 18px; fill: currentColor; }
+
+        /* 主内容区 */
+        .main-container {
+            flex: 1; display: flex; flex-direction: column; position: relative;
+            background: transparent; min-width: 0; overflow: hidden;
+        }
+        .top-bar {
+            height: 60px; display: flex; align-items: center; justify-content: flex-end;
+            padding: 0 24px; flex-shrink: 0; gap: 12px; -webkit-app-region: drag;
+        }
+        .top-bar > * { -webkit-app-region: no-drag; }
+        
+        .icon-btn {
+            width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);
+            background: var(--bg-surface); color: var(--text-secondary); display: flex; align-items: center; justify-content: center;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
+        .icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
+        
+        .win-btn { width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; }
+        .win-btn.close { background: #ff5f57; } .win-btn.minimize { background: #ffbd2e; margin-left:8px; }
+        .win-btn svg { width: 8px; height: 8px; opacity: 0; transition: 0.2s; stroke: #000; stroke-width: 2; stroke-linecap: round; }
+        .win-btn:hover svg { opacity: 0.6; }
+
+        .panel { display: none; flex: 1; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding: 0 24px 24px; animation: fadeIn 0.3s ease; min-height: 0; }
+        .panel.active { display: flex; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* 统一卡片样式 */
+        .config-card {
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px); margin-bottom: 20px; transition: all 0.3s;
+        }
+        .config-card:hover { border-color: var(--border-medium); }
+        .card-header {
+            display: flex; align-items: center; gap: 10px; padding: 16px 20px;
+            background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-light);
+        }
+        .card-header svg { width: 18px; height: 18px; stroke: var(--accent-blue); fill: none; stroke-width: 2; flex-shrink: 0; }
+        .card-header span { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .card-body { padding: 20px; }
+
+        /* 监控面板特殊布局 */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; flex-shrink: 0; }
+        .dash-card {
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; justify-content: space-between;
+        }
+        .dash-card-title { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
+        
+        .chip {
+            display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+            background: var(--bg-surface); border: 1px solid var(--border-light);
+            border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
+        .chip:hover { background: var(--bg-hover); border-color: var(--border-medium); }
+        .chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-blue); box-shadow: 0 0 8px var(--accent-blue); }
+
+        .mode-toggle {
+            display: inline-flex; align-items: center; gap: 10px; padding: 6px;
+            background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-pill); cursor: pointer;
+        }
+        .toggle-text { font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: var(--radius-pill); transition: 0.2s; color: var(--text-muted); }
+        .mode-toggle.auto .toggle-text.auto, .mode-toggle.assist .toggle-text.assist { background: var(--bg-active); color: var(--accent-blue); }
+        .mode-toggle.assist .toggle-text.assist { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
+
+        .content-area#logArea {
+            flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg); padding: 16px; overflow-y: auto; font-family: 'Consolas', monospace;
+        }
+        .log-entry { margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); display: flex; gap: 8px; align-items: flex-start; animation: fadeUp 0.3s ease; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .log-icon { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; background: var(--text-muted); flex-shrink: 0; margin-top: 2px; }
+        .log-icon.info { background: var(--accent-blue); } .log-icon.ok { background: var(--accent-green); }
+        .log-icon.warn { background: var(--accent-orange); } .log-icon.reply { background: var(--accent-purple); }
+        .log-icon.find { background: var(--accent-pink); }
+        .log-entry.type-system { color: var(--text-muted); justify-content: center; font-style: italic; background: none; box-shadow: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; animation: none; }
+
+        /* 表单与输入 */
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .form-input {
+            width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium);
+            border-radius: var(--radius); background: rgba(0,0,0,0.2); color: var(--text-primary);
+            font-size: 14px; outline: none; transition: 0.2s;
+        }
+        .form-input:focus, .form-select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
+        .form-select {
+            width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium);
+            border-radius: var(--radius); background-color: rgba(0,0,0,0.2); color: var(--text-primary);
+            font-size: 14px; outline: none; transition: 0.2s;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23cbd5e1' d='M6 8.5L2.5 5h7z'/%3E%3C/svg%3E"); 
+            appearance: none; background-repeat: no-repeat; background-position: right 14px center; 
+        }
+        .form-select option { background: #1e293b; color: #f8fafc; }
+        .form-hint { display: block; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+        .required { color: var(--accent-red); }
+
+        .slider { width: 100%; height: 6px; background-color: rgba(255,255,255,0.1); border-radius: 3px; outline: none; -webkit-appearance: none; appearance: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background-color: var(--accent-blue); cursor: pointer; transition: 0.2s; }
+        .slider::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 0 10px var(--accent-blue); }
+
+        .btn-save, .btn-reset, .btn-calibrate, .btn-add-model {
+            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 16px; border: none; border-radius: var(--radius);
+            font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
+        }
         .btn-add-model {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            background: var(--accent-blue);
-            color: white;
-            border: none;
-            border-radius: var(--radius-sm);
-            font-size: 13px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--transition-fast);
+            white-space: nowrap; flex-shrink: 0;
         }
-        .btn-add-model:hover {
-            background: #5558e6;
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-sm);
-        }
-        .btn-add-model svg {
-            width: 14px;
-            height: 14px;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
+        .btn-save, .btn-add-model { background: var(--accent-blue); color: white; }
+        .btn-save:hover, .btn-add-model:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
+        .btn-reset { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-medium); }
+        .btn-reset:hover { background: var(--bg-hover); }
+        .btn-calibrate { background: var(--accent-green); color: white; width: 100%; padding: 14px; font-size: 15px; }
+        .btn-calibrate:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
+        .action-buttons { display: flex; gap: 12px; margin-top: 20px; }
+        .action-buttons button { flex: 1; }
 
-        /* 加载状态 */
-        .loading-models {
-            text-align: center;
-            padding: 20px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-        .empty-models {
-            text-align: center;
-            padding: 30px 20px;
-            color: var(--text-muted);
-        }
-        .empty-models svg {
-            width: 48px;
-            height: 48px;
-            stroke: var(--text-muted);
-            fill: none;
-            stroke-width: 1.2;
-            opacity: 0.4;
-            margin-bottom: 12px;
-        }
-        .empty-models .empty-text {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
-        }
-        .empty-models .empty-hint {
-            font-size: 12px;
-            margin-top: 4px;
-        }
+        .input-with-toggle { position: relative; }
+        .toggle-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; }
+        .toggle-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
 
-        /* 模型选择器样式 */
-        .model-selector-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 12px 14px;
-            background: var(--bg-surface);
-            border: 1px solid var(--border-light);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: all var(--transition-fast);
+        /* 人设分栏布局 (Master-Detail) */
+        .split-layout { display: flex; flex-direction: row !important; gap: 20px; align-items: flex-start; }
+        .split-left {
+            width: 280px; min-width: 280px; max-width: 280px; flex-shrink: 0; overflow-y: auto;
+            background: var(--bg-card); border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
+            backdrop-filter: blur(10px);
         }
-        .model-selector-item:hover {
-            background: var(--bg-hover);
-            border-color: var(--border-medium);
-            transform: translateY(-1px);
+        .split-left::-webkit-scrollbar { width: 4px; }
+        .split-left::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+        .split-right { flex: 1; min-width: 0; overflow-y: auto; }
+        .split-right::-webkit-scrollbar { width: 4px; }
+        .split-right::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+        /* 右侧占位引导面板 */
+        .split-placeholder {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: var(--bg-card); border: 2px dashed var(--border-medium);
+            border-radius: var(--radius-lg); padding: 40px; text-align: center;
+            min-height: 300px;
         }
-        .model-selector-item.selected {
-            background: var(--bg-active);
-            border-color: var(--accent-blue);
+        .split-placeholder svg { width: 56px; height: 56px; stroke: var(--text-muted); fill: none; stroke-width: 1.2; opacity: 0.3; margin-bottom: 16px; }
+        .split-placeholder .ph-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
+        .split-placeholder .ph-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 260px; }
+
+        /* 强制保持 Master-Detail 左栏始终可见 */
+        #templatesList, #contactsList { display: block !important; }
+
+        .model-item {
+            background: var(--bg-surface); border: 1px solid var(--border-medium);
+            border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; gap: 12px;
+            transition: all 0.2s; cursor: pointer; margin-bottom: 8px;
         }
-        .model-selector-item .selector-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: var(--radius-sm);
-            background: var(--accent-blue);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
-            flex-shrink: 0;
+        .model-item:hover { background: var(--bg-hover); border-color: var(--border-dark); }
+        .model-item.current { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
+        .model-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-purple); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; flex-shrink: 0; }
+        .model-info { flex: 1; min-width: 0; }
+        .model-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .model-provider { font-size: 12px; color: var(--text-muted); }
+        .btn-icon-small {
+            width: 28px; height: 28px; border-radius: var(--radius-sm); background: transparent; border: 1px solid transparent;
+            color: var(--text-secondary); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
         }
-        .model-selector-item .selector-info {
-            flex: 1;
-        }
-        .model-selector-item .selector-name {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 2px;
-        }
-        .model-selector-item .selector-provider {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-        .model-selector-item .selector-badge {
-            padding: 3px 8px;
-            background: var(--accent-blue);
-            color: white;
-            font-size: 11px;
-            font-weight: 600;
-            border-radius: var(--radius-sm);
-        }
-        .model-selector-item .selector-check {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid var(--border-medium);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            transition: all var(--transition-fast);
-        }
-        .model-selector-item.selected .selector-check {
-            background: var(--accent-blue);
-            border-color: var(--accent-blue);
-        }
-        .model-selector-item .selector-check svg {
-            width: 12px;
-            height: 12px;
-            fill: none;
-            stroke: white;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
+        .btn-icon-small:hover { background: rgba(255,255,255,0.1); color: #fff; }
+        .btn-icon-small.delete:hover { background: rgba(239,68,68,0.2); color: var(--accent-red); }
+        .btn-icon-small svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
+
+        /* 模型操作按钮组 & 徽章 & 空状态 */
+        .model-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
+        .model-badge { font-size: 11px; font-weight: 600; color: var(--accent-blue); background: rgba(59,130,246,0.15); padding: 2px 8px; border-radius: var(--radius-pill); white-space: nowrap; }
+        .selector-badge { font-size: 11px; font-weight: 600; color: var(--accent-green); background: rgba(16,185,129,0.15); padding: 2px 8px; border-radius: var(--radius-pill); }
+        .empty-models { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; color: var(--text-muted); text-align: center; }
+        .empty-models svg { width: 40px; height: 40px; stroke: currentColor; fill: none; stroke-width: 1.5; opacity: 0.4; margin-bottom: 12px; }
+        .empty-text { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+        .empty-hint { font-size: 12px; opacity: 0.7; }
+        .loading-models { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
+
+        .calibration-status { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: var(--radius); }
+        .status-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; flex-shrink: 0; }
+        .status-icon.ok { background: rgba(16,185,129,0.2); color: var(--accent-green); }
+        .status-icon.error { background: rgba(239,68,68,0.2); color: var(--accent-red); }
+        .status-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
+        .status-desc { font-size: 13px; color: var(--text-muted); }
+
+        /* 配置页面两列网格布局 */
+        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        /* 模态框 */
+        .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; }
+        .custom-modal.active { display: flex; }
+        .modal-content { background: linear-gradient(135deg, #1e293b 0%, #1a1640 100%); border: 1px solid var(--border-dark); border-radius: var(--radius-xl); padding: 28px; width: 420px; max-width: 90vw; box-shadow: var(--shadow-lg); }
+        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+        .modal-message { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
+        .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; }
+        .modal-btn { padding: 8px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
+        .modal-btn.primary { background: var(--accent-blue); color: #fff; }
+        .modal-btn.primary:hover { background: #2563eb; }
+        .modal-btn.secondary { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-medium); }
+        .modal-btn.secondary:hover { background: var(--bg-hover); }
+
+        .model-selector-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-medium); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
+        .model-selector-item:hover { background: var(--bg-hover); }
+        .model-selector-item.selected { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
+        .selector-icon { width: 36px; height: 36px; background: var(--accent-blue); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; }
+        .selector-info { flex: 1; }
+        .selector-name { font-weight: 600; font-size: 14px; }
+        .selector-provider { font-size: 12px; color: var(--text-muted); }
+        .selector-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-muted); display: flex; align-items: center; justify-content: center; }
+        .model-selector-item.selected .selector-check { border-color: var(--accent-blue); background: var(--accent-blue); }
+        .selector-check svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 3; fill: none; }
     </style>
 </head>
 <body>
-
-    <!-- 顶部状态栏 -->
-    <div class="top-bar">
-        <div class="top-left">
-            <div class="app-logo idle" id="appLogo"></div>
-            <div class="status-group">
-                <span class="status-label" id="statusLabel">等待中</span>
-                <div class="status-dot" id="statusDot"></div>
+    <!-- 左侧导航栏 -->
+    <div class="sidebar">
+        <div class="brand">
+            <div class="app-logo idle" id="appLogo">
+                <!-- 纯净版微信双气泡徽标 -->
+                <svg viewBox="0 0 1024 1024" fill="#ffffff">
+                    <path d="M375.5 768.1c-30.8 0-60.6-6-88.3-17.2-56.8 28.2-121.3 42.5-188.7 42.5-7.8 0-15.6-0.3-23.4-1-7.5-0.7-11.8-8.8-7.5-14.9 23.3-32.9 44.6-73.5 53.6-113.9C49.3 592.4 8 495.7 8 388 8 178 172.6 7.8 375.5 7.8c203 0 367.5 170.2 367.5 380.2 0 210-164.5 380.1-367.5 380.1z m367.6 194.5c-22.2 0-43.7-3.8-63.6-10.8-40.9 17.6-87.3 26.6-135.9 26.6-5.6 0-11.3-0.2-16.8-0.6-5.4-0.4-8.5-6-5.4-10.4 16.8-23.8 32.1-53.1 38.6-82.3-51.6-49.8-81.2-118-81.2-194 0-149.7 127-270.9 283.5-270.9 156.5 0 283.4 121.3 283.4 270.9 0 149.6-126.9 270.9-283.4 270.9-6.4 0-12.7-0.2-19-0.4z" />
+                    <circle cx="248.1" cy="253.1" r="41.2" fill="#07c160" />
+                    <circle cx="502.9" cy="253.1" r="41.2" fill="#07c160" />
+                    <circle cx="653.2" cy="586.5" r="30" fill="#07c160" />
+                    <circle cx="813.2" cy="586.5" r="30" fill="#07c160" />
+                </svg>
+            </div>
+            <div class="brand-text">
+                <div class="brand-title">WeChat.AI 控制台</div>
+                <div class="status-group">
+                    <div class="status-dot" id="statusDot"></div>
+                    <span class="status-label" id="statusLabel">等待中</span>
+                </div>
             </div>
         </div>
-        <div class="top-right">
+
+        <div class="tab-nav">
+            <div class="tab-item active" onclick="switchTab('panel-monitor', this)">
+                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                <span>监控大厅</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('panel-persona', this)">
+                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                <span>专属人设库</span>
+            </div>
+            <div class="tab-item" onclick="switchTab('panel-settings', this)">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+                <span>系统配置</span>
+            </div>
+        </div>
+
+        <button class="btn-launch start" id="btnLaunch" onclick="toggleEngine()">
+            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            启动引擎
+        </button>
+    </div>
+
+    <!-- 主展示区 -->
+    <div class="main-container">
+        <!-- 顶部控制条 -->
+        <div class="top-bar">
             <button class="icon-btn" onclick="clearLogs()" title="清屏">
                 <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
             </button>
-            <div style="width:1px;height:20px;background:var(--border-light);margin:0 4px;"></div>
+            <div style="width:1px;height:20px;background:var(--border-medium);"></div>
             <button class="win-btn minimize" onclick="minimizeApp()" title="最小化">
                 <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
@@ -1359,438 +399,315 @@
                 <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
-    </div>
-
-    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
 
         <!-- 面板 1: 监控日志 -->
         <div id="panel-monitor" class="panel active">
+            <div class="dashboard-grid">
+                <div class="dash-card">
+                    <div>
+                        <div class="dash-card-title">当前 AI 大模型</div>
+                        <div class="chip" onclick="showModelSelector()" title="点击切换模型">
+                            <div class="chip-dot"></div>
+                            <span id="currentModelName">DeepSeek-V3</span>
+                            <span style="font-size: 10px; color: var(--text-muted); margin-left:2px;">▼</span>
+                        </div>
+                    </div>
+                    <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke: var(--text-muted); fill: none; stroke-width: 1.5; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                </div>
+                <div class="dash-card">
+                    <div>
+                        <div class="dash-card-title">运行工作模式</div>
+                        <div class="mode-toggle" onclick="toggleWorkMode()" title="点击切换工作模式" id="workModeToggle">
+                            <span class="toggle-text auto">自动飞行</span>
+                            <span class="toggle-text assist">半辅助验证</span>
+                        </div>
+                    </div>
+                    <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke: var(--text-muted); fill: none; stroke-width: 1.5; opacity: 0.5;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                </div>
+            </div>
+
+            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary);">实时追踪终端</h3>
             <div class="content-area" id="logArea">
-                <div class="log-entry type-system">WeChat.AI 控制台已就绪，点击底部「启动」按钮即可开始。</div>
-            </div>
-
-            <div class="action-bar">
-                <button class="btn-launch start" id="btnLaunch" onclick="toggleEngine()">
-                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    启动
-                </button>
-                <div class="chip" onclick="showModelSelector()" style="cursor: pointer;" title="点击切换模型">
-                    <div class="chip-dot"></div>
-                    <span id="currentModelName">DeepSeek-V3</span>
-                    <span class="arrow">›</span>
-                </div>
-                <div class="mode-toggle" onclick="toggleWorkMode()" title="点击切换工作模式" id="workModeToggle">
-                    <span class="toggle-text-left">自动</span>
-                    <div class="toggle-slider" id="workModeSlider"></div>
-                    <span class="toggle-text-right">辅助</span>
-                </div>
+                <div class="log-entry type-system">WeChat.AI 控制台已就绪，点击左侧底部「启动引擎」按钮即可开始。</div>
             </div>
         </div>
 
-        <!-- 面板 2: 配置 -->
-        <div id="panel-settings" class="panel">
-            <div class="content-area" style="padding: 16px;">
-
-                <!-- 窗口配置卡片 -->
-                <div class="config-card">
-                    <div class="card-header">
-                        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
-                        <span>窗口坐标配置</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="calibration-status" id="calibStatus">
-                            <div class="status-icon" id="calibIcon">?</div>
-                            <div class="status-info">
-                                <div class="status-title" id="calibTitle">检测中...</div>
-                                <div class="status-desc" id="calibDesc">正在读取坐标配置</div>
-                            </div>
-                        </div>
-                        <button class="btn-calibrate" onclick="startCalibration()">
-                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                            一键校准坐标
-                        </button>
-                        <small class="form-hint" style="margin-top: 8px; display: block;">
-                            📋 校准流程：会弹出3个窗口，依次框选会话列表、聊天区域、输入框
-                        </small>
-                    </div>
-                </div>
-
-                <!-- LLM 配置卡片 -->
-                <div class="config-card">
-                    <div class="card-header">
-                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                        <span>AI 模型配置</span>
-                        <button class="btn-add-model" onclick="showAddModelForm()" style="margin-left: auto;">
-                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                            添加模型
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <!-- 模型列表容器 -->
-                        <div id="modelsList">
-                            <div class="loading-models">正在加载模型配置...</div>
-                        </div>
-
-                        <!-- 添加/编辑模型表单（默认隐藏） -->
-                        <div id="modelForm" style="display: none;">
-                            <h4 id="modelFormTitle" style="margin-bottom: 16px; color: var(--text-primary);">添加新模型</h4>
-
-                            <div class="form-group">
-                                <label>模型名称 <span class="required">*</span></label>
-                                <input type="text" id="modelName" placeholder="例如：我的 DeepSeek V3" class="form-input">
-                            </div>
-
-                            <div class="form-group">
-                                <label>模型 ID <span class="required">*</span></label>
-                                <input type="text" id="modelId" placeholder="例如：my_deepseek_v3" class="form-input">
-                                <small class="form-hint">用于唯一标识此模型，只能包含字母、数字、下划线和连字符</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label>提供商 <span class="required">*</span></label>
-                                <select id="modelProvider" class="form-select" onchange="onModelProviderChange()">
-                                    <option value="deepseek">DeepSeek (深度求索)</option>
-                                    <option value="openai">OpenAI (GPT-4/GPT-3.5)</option>
-                                    <option value="gemini">Google Gemini</option>
-                                    <option value="zhipu">智谱AI (GLM-4)</option>
-                                    <option value="moonshot">Moonshot (月之暗面)</option>
-                                    <option value="custom">自定义配置</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>API Key <span class="required">*</span></label>
-                                <div class="input-with-toggle">
-                                    <input type="password" id="apiKey" placeholder="粘贴你的 API Key" class="form-input">
-                                    <button class="toggle-btn" onclick="togglePasswordVisibility('apiKey')">
-                                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    </button>
-                                </div>
-                                <small class="form-hint" id="apiKeyHint">获取方式：访问 https://platform.deepseek.com</small>
-                            </div>
-
-                            <div class="form-group" id="customConfigGroup" style="display: none;">
-                                <label>API Base URL</label>
-                                <input type="text" id="baseUrl" placeholder="https://api.example.com/v1" class="form-input">
-                            </div>
-
-                            <div class="form-group" id="customModelGroup" style="display: none;">
-                                <label>模型名称</label>
-                                <input type="text" id="model" placeholder="gpt-4" class="form-input">
-                            </div>
-
-                            <div class="model-info" id="modelInfo">
-                                <strong>当前配置：</strong>
-                                <span id="currentModelConfig">DeepSeek V3 (deepseek-chat)</span>
-                            </div>
-
-                            <div class="action-buttons">
-                                <button class="btn-save" onclick="saveModel()">
-                                    <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                    保存模型
-                                </button>
-                                <button class="btn-reset" onclick="hideModelForm()">
-                                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                    取消
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- OCR 配置卡片 -->
-                <div class="config-card">
-                    <div class="card-header">
-                        <svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
-                        <span>OCR 识别配置</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>置信度阈值: <span id="ocrValue">0.7</span></label>
-                            <input type="range" id="ocrThreshold" min="0.1" max="1.0" step="0.05" value="0.7" class="slider" oninput="updateOcrValue(this.value)">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 防风控配置卡片 -->
-                <div class="config-card">
-                    <div class="card-header">
-                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                        <span>防风控配置</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>错别字率: <span id="typoValue">2%</span></label>
-                            <input type="range" id="typoRate" min="0" max="10" step="1" value="2" class="slider" oninput="updateTypoValue(this.value)">
-                        </div>
-                        <div class="form-group">
-                            <label>睡眠时间段</label>
-                            <input type="text" id="sleepHours" placeholder="00:00-07:00" class="form-input">
-                            <small class="form-hint">设置 AI 休息时间段，格式：HH:MM-HH:MM</small>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 保存按钮 -->
-                <div class="action-buttons">
-                    <button class="btn-save" onclick="saveConfig()">
-                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                        保存配置
-                    </button>
-                    <button class="btn-reset" onclick="resetConfig()">
-                        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
-                        重置默认
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- 面板 3: 人设 -->
+        <!-- 面板 2: 人设库 (Master-Detail 布局) -->
         <div id="panel-persona" class="panel">
-            <div class="content-area" style="padding: 16px;">
+            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
+                <button class="btn-save" id="btnTemplatesTab" onclick="switchPersonaMode('templates')" style="background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-medium);">模板管理</button>
+                <button class="btn-reset" id="btnContactsTab" onclick="switchPersonaMode('contacts')" style="background: rgba(0,0,0,0); border: 1px dashed var(--border-medium);">联系人专属配置</button>
+            </div>
 
-                <!-- 人设模式切换 -->
-                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
-                    <button class="btn-save" id="btnTemplatesTab" onclick="switchPersonaMode('templates')" style="flex: 1;">
-                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
-                        模板管理
-                    </button>
-                    <button class="btn-reset" id="btnContactsTab" onclick="switchPersonaMode('contacts')" style="flex: 1;">
-                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-                        联系人配置
-                    </button>
-                </div>
-
-                <!-- 模板管理区域 -->
-                <div id="personaTemplatesArea">
-                    <!-- 人设模板卡片 -->
-                    <div class="config-card">
-                        <div class="card-header">
-                            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
-                            <span>人设模板管理</span>
-                            <button class="btn-add-model" onclick="showAddTemplateForm()" style="margin-left: auto;">
-                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                添加模板
-                            </button>
+            <!-- 模板管理区 -->
+            <div id="personaTemplatesArea">
+                <div class="split-layout">
+                    <div class="split-left">
+                        <div class="card-header" style="justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+                                <span>内置模板库</span>
+                            </div>
+                            <button class="btn-icon-small" onclick="showAddTemplateForm()" title="添加自定义模板"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
                         </div>
+                        <div class="card-body" id="templatesList" style="padding: 12px;"></div>
+                    </div>
+                    <div class="split-right config-card" id="templateForm" style="display: none; height: fit-content;">
+                        <div class="card-header"><span id="templateFormTitle">添加新模板</span></div>
                         <div class="card-body">
-                            <div id="templatesList">
-                                <div class="loading-models">正在加载模板...</div>
+                            <div class="form-group">
+                                <label>模板ID <span class="required">*</span></label>
+                                <input type="text" id="templateId" class="form-input" placeholder="例如：work_partner">
+                            </div>
+                            <div class="form-group">
+                                <label>模板名称 <span class="required">*</span></label>
+                                <input type="text" id="templateName" class="form-input" placeholder="例如：工作伙伴">
+                            </div>
+                            <div class="form-group">
+                                <label>模板描述</label>
+                                <input type="text" id="templateDescription" class="form-input" placeholder="简短描述适用场景">
+                            </div>
+                            <div class="form-group">
+                                <label>System Prompt <span class="required">*</span></label>
+                                <textarea id="templatePrompt" rows="12" class="form-input" style="font-family: monospace; resize: vertical;" placeholder="在此注入AI的核心灵魂预设..."></textarea>
+                                <small class="form-hint" id="templateCharCount">0 / 5000 字符</small>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn-save" onclick="saveTemplate()">保存模板</button>
+                                <button class="btn-reset" onclick="hideTemplateForm()">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 右侧占位引导面板 -->
+                    <div class="split-placeholder" id="templatePlaceholder">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+                        <div class="ph-title">选择或创建模板</div>
+                        <div class="ph-desc">点击左侧列表中的模板进行编辑，或点击左上角的 + 按钮创建新模板。模板可被多个联系人引用，实现一处配置、处处生效。</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 联系人配置区域 -->
+            <div id="personaContactsArea" style="display: none;">
+                <div class="split-layout">
+                    <div class="split-left">
+                        <div class="card-header" style="justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                                <span>联系人列表</span>
+                            </div>
+                            <div style="display: flex; gap: 4px;">
+                                <button class="btn-icon-small" onclick="showDefaultPersonaForm()" title="修改默认兜底人设"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
+                                <button class="btn-icon-small" onclick="showAddContactForm()" title="添加针对特定联系人的人设"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+                            </div>
+                        </div>
+                        <div class="card-body" style="padding: 12px;">
+                            <div id="defaultPersonaDisplay" style="margin-bottom: 16px; padding: 12px; background: rgba(59,130,246,0.1); border: 1px dashed var(--accent-blue); border-radius: var(--radius-sm);">
+                                <div style="font-size: 12px; color: var(--accent-blue); margin-bottom: 4px;">⭐ 全局默认人设</div>
+                                <div id="defaultPersonaDesc" style="font-size: 13px;">适用于未命中任何配置的人</div>
+                            </div>
+                            <div id="contactsList"></div>
+                        </div>
+                    </div>
+                    <div class="split-right config-card" id="contactForm" style="display: none; height: fit-content;">
+                        <div class="card-header"><span id="contactFormTitle">联系列表配置向导</span></div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>目标联系人名称 <span class="required">*</span></label>
+                                <input type="text" id="contactName" class="form-input" placeholder="例如：张三（需与微信备注一致）">
+                            </div>
+                            <div class="form-group">
+                                <label>连带生效的别名名单</label>
+                                <input type="text" id="contactAliases" class="form-input" placeholder="如：李四, 王五（用逗号分隔）">
+                            </div>
+                            <div class="form-group">
+                                <label>配置源方式</label>
+                                <div style="display: flex; gap: 16px; align-items: center; margin-top: 8px;">
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        <input type="radio" name="personaMode" value="template" checked onclick="onContactModeChange()">
+                                        <span style="font-size: 14px;">引用现成模板</span>
+                                    </label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                        <input type="radio" name="personaMode" value="custom" onclick="onContactModeChange()">
+                                        <span style="font-size: 14px;">完全自定义人设</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div id="contactTemplateMode">
+                                <div class="form-group">
+                                    <label>映射的模板库 <span class="required">*</span></label>
+                                    <select id="contactTemplateSelect" class="form-select" onchange="onContactTemplateChange()"></select>
+                                    <small class="form-hint" id="selectedTemplateDesc">选择后他将继承此模板特征</small>
+                                </div>
+                            </div>
+                            
+                            <div id="contactCustomMode" style="display: none;">
+                                <div class="form-group">
+                                    <label>自定义身份标签 <span class="required">*</span></label>
+                                    <input type="text" id="contactPersonaName" class="form-input" placeholder="例如：我的死党">
+                                </div>
+                                <div class="form-group">
+                                    <label>标签描述</label>
+                                    <input type="text" id="contactDescription" class="form-input" placeholder="描述此针对性人设的风格">
+                                </div>
+                                <div class="form-group">
+                                    <label>System Prompt 指令 <span class="required">*</span></label>
+                                    <textarea id="contactPrompt" rows="8" class="form-input" style="font-family: monospace;" placeholder="注入AI针对性预设..."></textarea>
+                                    <small class="form-hint" id="contactCharCount">0 / 5000 字符</small>
+                                </div>
                             </div>
 
-                            <!-- 添加/编辑模板表单（默认隐藏） -->
-                            <div id="templateForm" style="display: none;">
-                                <h4 id="templateFormTitle" style="margin-bottom: 16px; color: var(--text-primary);">添加新模板</h4>
-
-                                <div class="form-group">
-                                    <label>模板ID <span class="required">*</span></label>
-                                    <input type="text" id="templateId" placeholder="例如：work_partner" class="form-input">
-                                    <small class="form-hint">只能包含字母、数字、下划线，用于标识模板</small>
+                            <div class="form-group" style="margin-top: 20px;">
+                                <label>拦截生效状态</label>
+                                <div style="display: flex; gap: 16px; align-items: center;">
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="contactEnabled" value="true" checked><span>拦截并自动处理</span></label>
+                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="contactEnabled" value="false"><span>静默绕过</span></label>
                                 </div>
+                            </div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn-save" onclick="saveContact()">确认保存约束</button>
+                                <button class="btn-reset" onclick="hideContactForm()">丢弃更改</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 联系人右侧占位引导面板 -->
+                    <div class="split-placeholder" id="contactPlaceholder">
+                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                        <div class="ph-title">选择或添加联系人</div>
+                        <div class="ph-desc">点击左侧联系人进行编辑，或点击 + 按钮添加新联系人。每位联系人可引用模板或使用完全自定义的人设配置。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                                <div class="form-group">
-                                    <label>模板名称 <span class="required">*</span></label>
-                                    <input type="text" id="templateName" placeholder="例如：工作伙伴" class="form-input">
+        <!-- 面板 3: 配置 -->
+        <div id="panel-settings" class="panel">
+            <div class="settings-grid">
+                <!-- 左列 -->
+                <div>
+                    <!-- 核心校验模块 -->
+                    <div class="config-card">
+                        <div class="card-header"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg><span>视觉屏幕抓取基座</span></div>
+                        <div class="card-body">
+                            <div class="calibration-status" id="calibStatus">
+                                <div class="status-icon" id="calibIcon">?</div>
+                                <div>
+                                    <div class="status-title" id="calibTitle">检测中...</div>
+                                    <div class="status-desc" id="calibDesc">正在读取本地坐标索引矩阵</div>
                                 </div>
+                            </div>
+                            <button class="btn-calibrate" onclick="startCalibration()">
+                                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                                重新校准屏幕捕捉区域
+                            </button>
+                            <small class="form-hint" style="text-align: center; margin-top: 12px; opacity: 0.7;">首次安装或微信窗口被拉伸过，需点击此处覆盖画框</small>
+                        </div>
+                    </div>
 
+                    <!-- 参数干预策略 -->
+                    <div class="config-card">
+                        <div class="card-header"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>人类行为拟态及防封策略参数</span></div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label>随机纠偏容错率（当前 <span id="typoValue">2%</span>）</label>
+                                <input type="range" id="typoRate" min="0" max="10" step="1" value="2" class="slider" oninput="updateTypoValue(this.value)">
+                            </div>
+                            <div class="form-group" style="margin-top: 24px;">
+                                <label>光学字符识别置信度底线（当前 <span id="ocrValue">0.7</span>）</label>
+                                <input type="range" id="ocrThreshold" min="0.1" max="1.0" step="0.05" value="0.7" class="slider" oninput="updateOcrValue(this.value)">
+                            </div>
+                            <div class="form-group" style="margin-top: 24px;">
+                                <label>AI 零响应睡眠期</label>
+                                <input type="text" id="sleepHours" class="form-input" placeholder="00:00-07:00">
+                                <small class="form-hint">屏蔽所有在此期间触发的消息投喂 (格式 HH:MM-HH:MM)</small>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn-save" onclick="saveConfig()">覆盖参数至硬盘</button>
+                                <button class="btn-reset" onclick="resetConfig()">清空并回退默认值</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 右列：LLM集市 -->
+                <div>
+                    <div class="config-card" style="height: 100%; display: flex; flex-direction: column;">
+                        <div class="card-header" style="justify-content: space-between;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                                <span>LLM 推理大脑集市节点</span>
+                            </div>
+                            <button class="btn-add-model" onclick="showAddModelForm()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>接入新节点</button>
+                        </div>
+                        <div class="card-body" style="flex:1;">
+                            <div id="modelsList"><div class="loading-models">寻址中...</div></div>
+
+                            <div id="modelForm" style="display: none;">
+                                <h4 id="modelFormTitle" style="margin-bottom: 20px;">节点挂载参数设置</h4>
+                                <div class="form-group"><label>节点本地标识名 <span class="required">*</span></label><input type="text" id="modelName" class="form-input" placeholder="例：DeepSeek 主力"></div>
+                                <div class="form-group"><label>系统内部映射 ID <span class="required">*</span></label><input type="text" id="modelId" class="form-input" placeholder="例：ds_main_1"></div>
                                 <div class="form-group">
-                                    <label>模板描述</label>
-                                    <input type="text" id="templateDescription" placeholder="简短描述这个模板的适用场景" class="form-input">
+                                    <label>云端供应商 <span class="required">*</span></label>
+                                    <select id="modelProvider" class="form-select" onchange="onModelProviderChange()">
+                                        <option value="deepseek">DeepSeek (深度求索)</option>
+                                        <option value="openai">OpenAI (GPT 系列)</option>
+                                        <option value="gemini">Google Gemini</option>
+                                        <option value="zhipu">智谱AI (GLM 系列)</option>
+                                        <option value="moonshot">Moonshot (Kimi)</option>
+                                        <option value="custom">自托管 / 第三方路由转发</option>
+                                    </select>
                                 </div>
-
                                 <div class="form-group">
-                                    <label>System Prompt <span class="required">*</span></label>
-                                    <textarea id="templatePrompt" rows="8" class="form-input" style="resize: vertical; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.5;" placeholder="输入 AI 的系统人设指令..."></textarea>
-                                    <small class="form-hint" id="templateCharCount">0 / 5000 字符</small>
+                                    <label>授权密钥凭证 (API Key) <span class="required">*</span></label>
+                                    <div class="input-with-toggle">
+                                        <input type="password" id="apiKey" class="form-input" placeholder="sk-...">
+                                        <button class="toggle-btn" onclick="togglePasswordVisibility('apiKey')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
+                                    </div>
+                                    <small class="form-hint" id="apiKeyHint">点击获取指南</small>
+                                </div>
+                                <div class="form-group" id="customConfigGroup" style="display: none;"><label>转发网关 URL</label><input type="text" id="baseUrl" class="form-input" placeholder="https://api.yourdomain.com/v1"></div>
+                                <div class="form-group" id="customModelGroup" style="display: none;"><label>实际调用模型体 (Model ID)</label><input type="text" id="model" class="form-input" placeholder="gpt-4"></div>
+                                
+                                <div style="margin-top: 16px; padding: 12px; background: rgba(59,130,246,0.1); border-radius: 8px;">
+                                    <span style="font-size: 13px; color: var(--text-secondary);">当前选中参数簇：</span><br/>
+                                    <span id="currentModelConfig" style="font-size: 14px; font-weight: 600; color: var(--accent-blue);"></span>
                                 </div>
 
                                 <div class="action-buttons">
-                                    <button class="btn-save" onclick="saveTemplate()">
-                                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                        保存模板
-                                    </button>
-                                    <button class="btn-reset" onclick="hideTemplateForm()">
-                                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                        取消
-                                    </button>
+                                    <button class="btn-save" onclick="saveModel()">确立节点配置</button>
+                                    <button class="btn-reset" onclick="hideModelForm()">丢弃草稿</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <!-- 联系人配置区域 -->
-                <div id="personaContactsArea" style="display: none;">
-                    <!-- 联系人人设配置卡片 -->
-                    <div class="config-card">
-                        <div class="card-header">
-                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                            <span>联系人配置</span>
-                            <button class="btn-add-model" onclick="showAddContactForm()" style="margin-left: auto;">
-                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                                添加联系人
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div id="contactsList">
-                                <div class="loading-models">正在加载联系人配置...</div>
-                            </div>
-
-                            <!-- 添加/编辑联系人表单（默认隐藏） -->
-                            <div id="contactForm" style="display: none;">
-                                <h4 id="contactFormTitle" style="margin-bottom: 16px; color: var(--text-primary);">添加新联系人</h4>
-
-                                <div class="form-group">
-                                    <label>联系人名称（或配置组名） <span class="required">*</span></label>
-                                    <input type="text" id="contactName" placeholder="例如：张三" class="form-input">
-                                    <small class="form-hint">这是此配置的唯一标识，建议使用微信联系人名字或自定组名</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>配置适用多人（别名）</label>
-                                    <input type="text" id="contactAliases" placeholder="例如：张三, 李四, 王五" class="form-input">
-                                    <small class="form-hint">支持给多个联系人设置相同人设，用半角逗号分隔</small>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>配置方式</label>
-                                    <div style="display: flex; gap: 16px; align-items: center;">
-                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                            <input type="radio" name="personaMode" value="template" checked onclick="onContactModeChange()" style="cursor: pointer;">
-                                            <span style="font-size: 13px;">引用模板</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                            <input type="radio" name="personaMode" value="custom" onclick="onContactModeChange()" style="cursor: pointer;">
-                                            <span style="font-size: 13px;">自定义人设</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <!-- 引用模板模式 -->
-                                <div id="contactTemplateMode">
-                                    <div class="form-group">
-                                        <label>选择模板 <span class="required">*</span></label>
-                                        <select id="contactTemplateSelect" class="form-select" onchange="onContactTemplateChange()">
-                                            <option value="">-- 请选择模板 --</option>
-                                        </select>
-                                        <small class="form-hint" id="selectedTemplateDesc">选择一个模板后，该联系人将使用模板的人设配置</small>
-                                    </div>
-                                </div>
-
-                                <!-- 自定义人设模式 -->
-                                <div id="contactCustomMode" style="display: none;">
-                                    <div class="form-group">
-                                        <label>人设名称 <span class="required">*</span></label>
-                                        <input type="text" id="contactPersonaName" placeholder="例如：工作伙伴" class="form-input">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label>人设描述</label>
-                                        <input type="text" id="contactDescription" placeholder="简短描述这个人设的风格" class="form-input">
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label>System Prompt <span class="required">*</span></label>
-                                        <textarea id="contactPrompt" rows="8" class="form-input" style="resize: vertical; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.5;" placeholder="输入 AI 的系统人设指令..."></textarea>
-                                        <small class="form-hint" id="contactCharCount">0 / 5000 字符</small>
-                                    </div>
-                                </div>
-
-                                <div class="form-group">
-                                    <label>状态</label>
-                                    <div style="display: flex; gap: 16px; align-items: center;">
-                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                            <input type="radio" name="contactEnabled" value="true" checked style="cursor: pointer;">
-                                            <span style="font-size: 13px;">启用</span>
-                                        </label>
-                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                            <input type="radio" name="contactEnabled" value="false" style="cursor: pointer;">
-                                            <span style="font-size: 13px;">禁用</span>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                <div class="action-buttons">
-                                    <button class="btn-save" onclick="saveContact()">
-                                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                                        保存配置
-                                    </button>
-                                    <button class="btn-reset" onclick="hideContactForm()">
-                                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                                        取消
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 默认人设设置卡片 -->
-                    <div class="config-card">
-                        <div class="card-header">
-                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
-                            <span>默认人设设置</span>
-                            <button class="btn-add-model" onclick="showDefaultPersonaForm()" style="margin-left: auto;">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                                编辑默认人设
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div id="defaultPersonaDisplay" style="padding: 12px; background: var(--bg-chip); border-radius: 8px; border: 1px solid var(--border-light);">
-                                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">默认人设</div>
-                                <div id="defaultPersonaDesc" style="font-size: 14px; color: var(--text-primary);">适用于所有未配置特定人设的联系人</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
             </div>
         </div>
     </div>
 
-    <!-- 自定义弹窗 -->
+    <!-- 弹窗部分保持一致的功能 -->
     <div id="customModal" class="custom-modal">
         <div class="modal-content">
-            <div class="modal-title" id="modalTitle">提示</div>
-            <div class="modal-message" id="modalMessage">消息内容</div>
-            <div class="modal-buttons">
-                <button class="modal-btn primary" onclick="closeModal()">确定</button>
-            </div>
+            <div class="modal-title" id="modalTitle">系统硬件与底层提示</div>
+            <div class="modal-message" id="modalMessage"></div>
+            <div class="modal-buttons"><button class="modal-btn primary" onclick="closeModal()">我已知晓</button></div>
         </div>
     </div>
 
-    <!-- 模型选择弹窗 -->
+    <!-- 模型选择器弹窗 -->
     <div id="modelSelectorModal" class="custom-modal">
-        <div class="modal-content" style="max-width: 450px;">
-            <div class="modal-title">切换 AI 模型</div>
-            <div class="modal-message" style="max-height: 400px; overflow-y: auto;">
-                <div id="modelSelectorList" style="display: flex; flex-direction: column; gap: 8px;">
-                    <!-- 模型列表将动态生成 -->
-                </div>
+        <div class="modal-content">
+            <div class="modal-title">网关节点热切换</div>
+            <div class="modal-message" style="margin-bottom: 20px;">
+                <div id="modelSelectorList" style="display: flex; flex-direction: column; gap: 4px;"></div>
             </div>
-            <div class="modal-buttons">
-                <button class="modal-btn secondary" onclick="closeModelSelector()">取消</button>
-            </div>
+            <div class="modal-buttons"><button class="modal-btn secondary" onclick="closeModelSelector()">放弃更改</button></div>
         </div>
     </div>
 
-    <!-- 底部 Tab -->
-    <div class="tab-nav">
-        <div class="tab-item active" onclick="switchTab('panel-monitor', this)">
-            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-            <span>监控</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('panel-settings', this)">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-            <span>配置</span>
-        </div>
-        <div class="tab-item" onclick="switchTab('panel-persona', this)">
-            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-            <span>人设</span>
-        </div>
-    </div>
-
-    <script>
+<script>
         let isRunning = false;
         let pollTimer = null;
         const logArea = document.getElementById('logArea');
@@ -2688,8 +1605,8 @@
             document.getElementById('templatePrompt').value = '';
             updateTemplateCharCount();
 
-            document.getElementById('templatesList').style.display = 'none';
             document.getElementById('templateForm').style.display = 'block';
+            document.getElementById('templatePlaceholder').style.display = 'none';
         }
 
         function editTemplate(templateId) {
@@ -2705,13 +1622,13 @@
             document.getElementById('templatePrompt').value = template.system_prompt || '';
             updateTemplateCharCount();
 
-            document.getElementById('templatesList').style.display = 'none';
             document.getElementById('templateForm').style.display = 'block';
+            document.getElementById('templatePlaceholder').style.display = 'none';
         }
 
         function hideTemplateForm() {
             document.getElementById('templateForm').style.display = 'none';
-            document.getElementById('templatesList').style.display = 'block';
+            document.getElementById('templatePlaceholder').style.display = 'flex';
             editingTemplateId = null;
         }
 
@@ -2805,8 +1722,8 @@
             document.querySelector('input[name="personaMode"][value="template"]').checked = true;
             onContactModeChange();
 
-            document.getElementById('contactsList').style.display = 'none';
             document.getElementById('contactForm').style.display = 'block';
+            document.getElementById('contactPlaceholder').style.display = 'none';
         }
 
         function editContact(contactName) {
@@ -2840,13 +1757,13 @@
 
             document.querySelector(`input[name="contactEnabled"][value="${contact.enabled !== false ? 'true' : 'false'}"]`).checked = true;
 
-            document.getElementById('contactsList').style.display = 'none';
             document.getElementById('contactForm').style.display = 'block';
+            document.getElementById('contactPlaceholder').style.display = 'none';
         }
 
         function hideContactForm() {
             document.getElementById('contactForm').style.display = 'none';
-            document.getElementById('contactsList').style.display = 'block';
+            document.getElementById('contactPlaceholder').style.display = 'flex';
             editingContactName = null;
         }
 
@@ -2982,39 +1899,61 @@
         }
 
         function copyContact(sourceContactName) {
-            // 显示一个简单的输入对话框
-            const newContactName = prompt(`请输入新联系人名称，将复制 '${sourceContactName}' 的配置：`);
-            if (!newContactName || !newContactName.trim()) {
-                return; // 用户取消或输入为空
-            }
+            // 使用自定义弹窗输入新联系人名称
+            const modal = document.getElementById('customModal');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalButtons = document.querySelector('.modal-buttons');
 
-            const trimmedName = newContactName.trim();
+            modalMessage.innerHTML = `<div style="margin-bottom:12px;">请输入新联系人名称，将复制 '${escapeHtml(sourceContactName)}' 的配置：</div><input type="text" id="copyContactInput" class="form-input" placeholder="新联系人名称" style="margin-bottom:0;">`;
+            modalButtons.innerHTML = '';
 
-            // 检查是否与源联系人名称相同
-            if (trimmedName === sourceContactName) {
-                showCustomAlert('新联系人名称不能与源联系人相同');
-                return;
-            }
+            const cancelBtn = document.createElement('button');
+            cancelBtn.className = 'modal-btn secondary';
+            cancelBtn.textContent = '取消';
+            cancelBtn.onclick = () => {
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modalButtons.innerHTML = '<button class="modal-btn primary" onclick="closeModal()">确定</button>';
+                }, 200);
+            };
 
-            // 获取源联系人配置
-            const sourceContact = personasList[sourceContactName];
-            if (!sourceContact) {
-                showCustomAlert('源联系人配置不存在');
-                return;
-            }
+            const confirmBtn = document.createElement('button');
+            confirmBtn.className = 'modal-btn primary';
+            confirmBtn.textContent = '确认复制';
+            confirmBtn.onclick = () => {
+                const newName = document.getElementById('copyContactInput').value.trim();
+                modal.classList.remove('active');
+                setTimeout(() => {
+                    modalButtons.innerHTML = '<button class="modal-btn primary" onclick="closeModal()">确定</button>';
+                }, 200);
 
-            // 准备新的配置数据（深拷贝）
-            const newContactData = JSON.parse(JSON.stringify(sourceContact));
-
-            // 调用后端API添加新联系人
-            window.pywebview.api.add_contact_persona(trimmedName, newContactData).then(result => {
-                if (result.status === 'ok') {
-                    showCustomAlert(`已将 '${sourceContactName}' 的配置复制到 '${trimmedName}'`);
-                    loadContacts(); // 重新加载列表
-                } else {
-                    showCustomAlert('复制失败: ' + result.msg);
+                if (!newName) return;
+                if (newName === sourceContactName) {
+                    showCustomAlert('新联系人名称不能与源联系人相同');
+                    return;
                 }
-            });
+                const sourceContact = personasList[sourceContactName];
+                if (!sourceContact) {
+                    showCustomAlert('源联系人配置不存在');
+                    return;
+                }
+                const newContactData = JSON.parse(JSON.stringify(sourceContact));
+                window.pywebview.api.add_contact_persona(newName, newContactData).then(result => {
+                    if (result.status === 'ok') {
+                        showCustomAlert(`已将 '${sourceContactName}' 的配置复制到 '${newName}'`);
+                        loadContacts();
+                    } else {
+                        showCustomAlert('复制失败: ' + result.msg);
+                    }
+                });
+            };
+
+            modalButtons.appendChild(cancelBtn);
+            modalButtons.appendChild(confirmBtn);
+            modal.classList.add('active');
+
+            // 延迟聚焦到输入框
+            setTimeout(() => { const inp = document.getElementById('copyContactInput'); if(inp) inp.focus(); }, 100);
         }
 
         function updateContactCharCount() {
@@ -3048,8 +1987,8 @@
             document.getElementById('contactPrompt').value = defaultPersona.system_prompt || '';
             updateContactCharCount();
 
-            document.getElementById('contactsList').style.display = 'none';
             document.getElementById('contactForm').style.display = 'block';
+            document.getElementById('contactPlaceholder').style.display = 'none';
         }
 
         // 监听输入变化

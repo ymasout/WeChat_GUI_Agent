@@ -978,12 +978,12 @@ if __name__ == "__main__":
     
     # 创建无边框原生窗口（去掉 Windows 默认标题栏）
     window = webview.create_window(
-        title="WeChat.AI",
+        title="WeChat.AI 控制台",
         url=f"file://{ui_path}",
         js_api=api,
-        width=400,
-        height=780,
-        resizable=False,
+        width=1024,
+        height=720,
+        resizable=True,
         frameless=True,      # 去掉原生标题栏
         easy_drag=True        # 允许拖拽移动窗口
     )
