@@ -2,6 +2,8 @@ import time
 import logging
 import sys
 import os
+import hashlib
+import json
 
 # 压制 PaddleOCR 的 WARNING 日志
 logging.getLogger('ppocr').setLevel(logging.ERROR)
@@ -38,6 +40,11 @@ class WeChatEngine:
         self.action = ActionExecutor()
         self.is_running = False
 
+        # P1 阶段新增：防鞭尸机制 - 存储每个联系人的最后回复消息哈希
+        self.last_replied_hash = {}  # 格式: {contact_name: hash_value}
+        self._hash_cache_file_path = "data/reply_hash_cache.json"  # 使用简单字符串，避免 Path 初始化问题
+        self._hash_cache_loaded = False  # 标记缓存是否已加载（延迟加载）
+
         # 读取工作模式配置
         import yaml
         try:
@@ -53,6 +60,126 @@ class WeChatEngine:
         """通知引擎准备挂起（在本次循环结束后停止）"""
         self.is_running = False
         log("🔴 引擎收到暂停指令，当前巡逻周期结束后将待机...")
+        # P1 阶段新增：停止时保存哈希缓存
+        self._save_hash_cache()
+
+    def _calculate_messages_hash(self, messages: list) -> str:
+        """
+        P1 阶段新增：计算消息列表的哈希值，用于检测重复触发
+        :param messages: 消息列表
+        :return: MD5 哈希字符串
+        """
+        try:
+            # 将消息转换为统一的字符串格式
+            content = "|".join([f"{m['sender']}:{m['text']}" for m in messages])
+            # 计算 MD5 哈希
+            return hashlib.md5(content.encode('utf-8')).hexdigest()
+        except Exception as e:
+            logging.error(f"❌ 安全防线：计算消息哈希失败 - {e}")
+            return ""
+
+    def _check_duplicate_reply(self, contact_name: str, messages: list) -> bool:
+        """
+        P1 阶段新增：检查是否为重复触发（防鞭尸机制）
+        :param contact_name: 联系人名字
+        :param messages: 当前消息列表
+        :return: True 表示重复，应跳过；False 表示新消息，应回复
+        """
+        try:
+            if not contact_name or not messages:
+                return False
+
+            # 延迟加载哈希缓存（首次使用时才加载）
+            if not self._hash_cache_loaded:
+                self._load_hash_cache()
+
+            # 计算当前消息哈希
+            current_hash = self._calculate_messages_hash(messages)
+            if not current_hash:
+                return False  # 计算失败时不阻止
+
+            # 获取该联系人的上次回复哈希
+            last_hash = self.last_replied_hash.get(contact_name)
+
+            if last_hash == current_hash:
+                logging.warning(f"🚨 安全防线：检测到重复触发（防鞭尸），跳过对「{contact_name}」的回复")
+                logging.warning(f"   哈希值: {current_hash[:8]}...")
+                return True
+
+            return False
+
+        except Exception as e:
+            logging.error(f"❌ 安全防线：重复检测失败 - {e}")
+            return False  # 出错时不阻止
+
+    def _record_reply_hash(self, contact_name: str, messages: list):
+        """
+        P1 阶段新增：记录已回复的消息哈希
+        :param contact_name: 联系人名字
+        :param messages: 消息列表
+        """
+        try:
+            if not contact_name or not messages:
+                return
+
+            current_hash = self._calculate_messages_hash(messages)
+            if current_hash:
+                self.last_replied_hash[contact_name] = current_hash
+                logging.debug(f"💾 安全防线：已记录「{contact_name}」的回复哈希: {current_hash[:8]}...")
+
+        except Exception as e:
+            logging.error(f"❌ 安全防线：记录哈希失败 - {e}")
+
+    def _load_hash_cache(self):
+        """P1 阶段新增：从文件加载哈希缓存（延迟加载，避免初始化时递归）"""
+        try:
+            # 避免重复加载
+            if self._hash_cache_loaded:
+                return
+
+            # 使用简单的字符串路径，完全避免 Path 对象
+            cache_file_path = self._hash_cache_file_path
+
+            # 检查文件是否存在
+            try:
+                if os.path.exists(cache_file_path):
+                    with open(cache_file_path, 'r', encoding='utf-8') as f:
+                        self.last_replied_hash = json.load(f)
+                    log(f"💾 安全防线：已加载哈希缓存，包含 {len(self.last_replied_hash)} 个联系人记录")
+                else:
+                    log("💾 安全防线：哈希缓存文件不存在，将创建新缓存")
+            except Exception as file_error:
+                logging.debug(f"缓存文件检查失败: {file_error}")
+
+            self._hash_cache_loaded = True
+
+        except Exception as e:
+            logging.error(f"❌ 安全防线：加载哈希缓存失败 - {e}")
+            self.last_replied_hash = {}
+            self._hash_cache_loaded = True  # 即使失败也标记为已加载，避免重复尝试
+
+    def _save_hash_cache(self):
+        """P1 阶段新增：保存哈希缓存到文件"""
+        try:
+            # 使用简单的字符串路径，完全避免 Path 对象
+            cache_file_path = self._hash_cache_file_path
+
+            # 提取目录部分并确保存在
+            cache_dir = os.path.dirname(cache_file_path)
+            if cache_dir and not os.path.exists(cache_dir):
+                os.makedirs(cache_dir, exist_ok=True)
+
+            # 写入文件
+            with open(cache_file_path, 'w', encoding='utf-8') as f:
+                json.dump(self.last_replied_hash, f, ensure_ascii=False, indent=2)
+
+            log(f"💾 安全防线：已保存哈希缓存，包含 {len(self.last_replied_hash)} 个联系人记录")
+        except Exception as e:
+            # 避免在异常处理中触发递归
+            try:
+                logging.error(f"❌ 安全防线：保存哈希缓存失败 - {str(e)}")
+            except Exception:
+                pass  # 如果连日志都失败了，就静默处理
 
     def _interruptible_sleep(self, seconds):
         """可被 stop() 中断的休眠：每秒检查一次 is_running"""
@@ -164,6 +291,25 @@ class WeChatEngine:
                     their_msgs = [m for m in new_msgs if m['sender'] == 'them']
 
                     if their_msgs:
+                        # P1 阶段新增：防鞭尸检查 - 检测是否重复触发
+                        if self._check_duplicate_reply(current_contact, new_msgs):
+                            log("🔄 检测到重复消息，跳过本次回复，等待新消息...")
+                            time.sleep(3)
+                            continue
+
+                        # P1 阶段增强：LLM 生成回复前的安全检查（检测用户是否在等待期间干预）
+                        try:
+                            if self.action._check_mouse_hijack():
+                                log("🚨 安全防线：检测到用户干预，等待用户操作完成...")
+                                self.action._wait_for_user_idle(check_interval=1.0, retry_interval=5.0)
+                                log("✅ 安全防线：用户操作已完成，继续生成回复...")
+                        except KeyboardInterrupt:
+                            log("⚠️ 用户中断操作，跳过本次回复...")
+                            time.sleep(3)
+                            continue
+                        except Exception as e:
+                            log(f"⚠️ 安全防线：LLM 前检查失败，继续执行 - {e}")
+
                         log("🧠 连线大模型...")
                         reply_text = self.brain.think_and_reply(new_msgs, current_contact)
 
@@ -172,6 +318,9 @@ class WeChatEngine:
                             # 根据工作模式决定是否自动发送
                             auto_send = (self.work_mode == 'auto')
                             self.action.send_message(reply_text, auto_send=auto_send)
+
+                            # P1 阶段新增：记录已回复的消息哈希
+                            self._record_reply_hash(current_contact, new_msgs)
 
                             if auto_send:
                                 log("✅ 已发送，冷却 3 秒...")
@@ -224,6 +373,25 @@ class WeChatEngine:
                     if not their_msgs:
                         continue
 
+                    # P1 阶段新增：蹲守模式下的防鞭尸检查
+                    if self._check_duplicate_reply(current_contact, new_msgs):
+                        log("🔄 蹲守模式：检测到重复消息，跳过本次回复...")
+                        time.sleep(FOLLOW_UP_INTERVAL)
+                        continue
+
+                    # P1 阶段增强：蹲守模式下 LLM 生成回复前的安全检查
+                    try:
+                        if self.action._check_mouse_hijack():
+                            log("🚨 安全防线：蹲守模式检测到用户干预，等待用户操作完成...")
+                            self.action._wait_for_user_idle(check_interval=1.0, retry_interval=5.0)
+                            log("✅ 安全防线：用户操作已完成，继续生成回复...")
+                    except KeyboardInterrupt:
+                        log("⚠️ 用户中断操作，跳过本次回复...")
+                        time.sleep(FOLLOW_UP_INTERVAL)
+                        continue
+                    except Exception as e:
+                        log(f"⚠️ 安全防线：蹲守模式检查失败，继续执行 - {e}")
+
                     log("🧠 检测到新回复，连线大模型...")
                     reply_text = self.brain.think_and_reply(new_msgs, current_contact)
 
@@ -232,6 +400,9 @@ class WeChatEngine:
                         # 根据工作模式决定是否自动发送
                         auto_send = (self.work_mode == 'auto')
                         self.action.send_message(reply_text, auto_send=auto_send)
+
+                        # P1 阶段新增：记录已回复的消息哈希
+                        self._record_reply_hash(current_contact, new_msgs)
 
                         if auto_send:
                             log("✅ 已发送，冷却 3 秒...")

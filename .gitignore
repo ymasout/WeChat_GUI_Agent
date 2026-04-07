@@ -24,6 +24,7 @@ ENV/
 # ---------- 敏感文件（绝对不能上传！）----------
 .env
 data/config.yaml
+data/reply_hash_cache.json
 
 # ---------- IDE / 编辑器 ----------
 .vscode/

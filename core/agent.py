@@ -1,6 +1,7 @@
 import os
 import yaml
 import logging
+import re
 from openai import OpenAI
 
 # 自动加载 .env 文件到环境变量（如果安装了 python-dotenv）
@@ -22,6 +23,9 @@ class AgentBrain:
     """
     def __init__(self, config_path="data/config.yaml"):
         self.config = self._load_config(config_path)
+
+        # P1 阶段新增：输出风控护栏 - 高危词汇黑名单
+        self.danger_keywords = self._init_danger_keywords()
 
         # 支持新的多模型配置系统
         models = self.config.get("models", [])
@@ -67,6 +71,71 @@ class AgentBrain:
             "6. 如果上下文里有特殊的例如 '[图片]' '[语音]' 等标志，委婉地说你不方便看或听，让对方发文字。\n"
             "7. 只输出你想发送的纯文本内容，不要包裹任何多余的解释、标点符号堆砌和 xml 代码块标记。"
         )
+
+    def _init_danger_keywords(self) -> list:
+        """
+        P1 阶段新增：初始化危险关键词黑名单
+        :return: 危险关键词列表
+        """
+        return [
+            # 财务类高危词
+            r'转账', r'汇款', r'打钱', r'付款', r'支付',
+            # 账户安全类
+            r'密码', r'验证码', r'账号', r'登录',
+            # 个人隐私类
+            r'身份证', r'身份证号', r'证件号',
+            # 退款类（商业风险）
+            r'退款', r'退钱', r'退货', r'赔偿', r'赔款',
+            # 承诺类（避免过度承诺）
+            r'保证', r'担保', r'承诺',
+            # 合同协议类
+            r'合同', r'协议', r'签约',
+        ]
+
+    def _check_safety_guardrail(self, text: str) -> tuple:
+        """
+        P1 阶段新增：风控护栏检查，检测高危词汇
+        :param text: 待检查的文本
+        :return: (is_safe, processed_text, warning_msg)
+            - is_safe: True 表示安全，False 表示触发风控
+            - processed_text: 处理后的文本（命中风控时为兜底话术）
+            - warning_msg: 警告信息
+        """
+        if not text:
+            return True, text, ""
+
+        try:
+            # 遍历所有危险关键词模式
+            for pattern in self.danger_keywords:
+                if re.search(pattern, text):
+                    # 命中风控！
+                    warning_msg = f"🚨 安全防线：输出风控拦截！检测到高危词汇 '{pattern}'"
+
+                    # 安全的兜底话术
+                    fallback_responses = [
+                        "这个问题比较敏感，我需要确认一下具体情况，稍后回复你哈。",
+                        "涉及到重要操作，建议你直接联系官方客服处理比较稳妥。",
+                        "这个事情我需要核实一下，暂时不能直接答复。",
+                        "不好意思，这个操作需要本人确认，我没法代劳呢。",
+                        "这事儿比较重要，建议你电话联系官方处理更安全。",
+                    ]
+
+                    import random
+                    safe_response = random.choice(fallback_responses)
+
+                    logging.warning(f"{warning_msg}")
+                    logging.warning(f"   原始回复：{text}")
+                    logging.warning(f"   已替换为安全话术：{safe_response}")
+
+                    return False, safe_response, warning_msg
+
+            # 未命中任何高危词，通过检查
+            return True, text, ""
+
+        except Exception as e:
+            logging.error(f"❌ 安全防线：风控检查失败 - {e}")
+            # 出错时采用保守策略：允许通过但记录日志
+            return True, text, f"风控检查出错: {e}"
 
     def _get_legacy_config(self):
         """旧的配置读取方式，作为回退方案"""
@@ -210,12 +279,37 @@ class AgentBrain:
                 temperature=0.7, # 根据大模型厂商的最佳聊天口语化体验值，不能太严谨
                 max_tokens=150
             )
+
+            # 安全检查：确保响应结构和内容都存在
+            if not response or not response.choices or len(response.choices) == 0:
+                logging.error("大脑：API 返回空响应，没有生成任何内容")
+                return "..."
+
+            if not response.choices[0].message:
+                logging.error("大脑：API 返回的响应中没有 message 字段")
+                return "..."
+
+            if not response.choices[0].message.content:
+                logging.error("大脑：API 返回的 message.content 为空")
+                logging.error(f"   完整响应结构：{response}")
+                return "..."
+
             reply_text = response.choices[0].message.content.strip()
             logging.info(f"大脑：电火花演算完毕，产出文字指令 ➡️ 【{reply_text}】")
-            return reply_text
-            
+
+            # P1 阶段新增：输出风控护栏检查（LLM 生成后、返回前）
+            is_safe, processed_text, warning_msg = self._check_safety_guardrail(reply_text)
+            if not is_safe:
+                logging.warning(f"⚠️ 安全防线：风控已拦截，返回安全话术")
+                # 可以在这里选择是否记录到专门的告警日志文件
+                # 或者触发通知（如发送邮件/推送给管理员）
+
+            return processed_text
+
         except Exception as e:
             logging.error(f"大脑：脑卒中崩溃！连接大模型 API 端点失败 - 原因: {e}")
+            logging.error(f"   当前模型: {self.model}")
+            logging.error(f"   消息数量: {len(messages_prompt)}")
             return "..." # 如果网络崩了，回复三个点避免微信对话挂住或者出错
 
 if __name__ == "__main__":

@@ -39,6 +39,18 @@ class OCRParser:
         # 多模态类型（系统提示字眼），如果遇到了这几个关键词之一，说明发来的不是纯文字
         self.multimodal_keywords = ['[语音]', '[图片]', '[视频]', '[文件]', '[转账]', '[动画表情]', '[位置]']
 
+        # P1 阶段增强：系统提示关键词（这些是微信的系统消息，不是对方发来的真实内容）
+        self.system_message_keywords = [
+            '会话内容将可能被对方所在的企业存档',  # 企业微信存档提示
+            '撤回了一条消息',  # 撤回消息提示
+            '你撤回了一条消息',  # 自己撤回消息
+            '对方撤回了一条消息',  # 对方撤回消息
+            '重新编辑',  # 撤回后重新编辑
+            '拍了拍',  # 拍一拍功能
+            '敏感词',  # 敏感词提示
+            '该消息包含敏感词',  # 敏感词提示
+        ]
+
     def read_contact_name(self, title_img):
         """
         从聊天标题栏截图中提取当前联系人的名字。
@@ -180,6 +192,18 @@ class OCRParser:
                 if keyword in text:
                     is_multimodal = True
                     break
+
+            # P1 阶段增强：系统提示过滤（跳过微信的系统消息）
+            is_system_message = False
+            for keyword in self.system_message_keywords:
+                if keyword in text:
+                    is_system_message = True
+                    logging.debug(f"🚫 过滤系统提示：{text[:50]}...")
+                    break
+
+            # 如果是系统提示，直接跳过，不作为对方的消息处理
+            if is_system_message:
+                continue
                     
             # 4. 防重复哈希与状态更新机制 
             # 把此时积累在本次截图扫出的前两句话（如果有），当作这句话的“时空锚点指纹”
