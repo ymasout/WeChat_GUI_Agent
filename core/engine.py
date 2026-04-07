@@ -264,10 +264,17 @@ class WeChatEngine:
                     session_img = self.vision.capture_region(abs_rect, session_rect)
                     list_items = self.parser.find_contact_in_list(session_img)
                 
-                    # 模糊匹配：联系人名字可能被OCR稍微识别偏差
+                    # 模糊匹配：联系人在列表中名字太长可能会被截断并加上 "..." 
                     found = False
+                    # 去除省略号进行匹配
+                    clean_target = current_contact.replace('...', '').replace('…', '').strip()
                     for text, cx, cy in list_items:
-                        if current_contact in text or text in current_contact:
+                        clean_text = text.replace('...', '').replace('…', '').strip()
+                        
+                        # 只要有交集（列表文本在目标内，或目标在列表文本内），或者前置几个字符一样（应对极致截断）
+                        if (clean_text and clean_text in clean_target) or \
+                           (clean_target and clean_target in clean_text) or \
+                           (len(clean_target) >= 3 and clean_text.startswith(clean_target[:3])):
                             close_x = session_rect[0] + cx
                             close_y = session_rect[1] + cy
                             log(f"✅ 找到「{current_contact}」在列表中的位置，点击关闭聊天...")

@@ -49,19 +49,26 @@ class OCRParser:
             return None
         if len(title_img.shape) == 3 and title_img.shape[2] == 4:
             title_img = cv2.cvtColor(title_img, cv2.COLOR_BGRA2BGR)
+            
+        # 【关键增强】为图像四周添加 15px 的纯白留白（Padding）
+        # 防止用户在校准画框时裁切得太贴近文字边缘，导致 OCR 计算文本轮廓时越界而直接放弃整行输出
+        try:
+            title_img = cv2.copyMakeBorder(title_img, 15, 15, 15, 15, cv2.BORDER_CONSTANT, value=[255, 255, 255])
+        except Exception:
+            pass
         
         results = self.ocr.ocr(title_img)
         if not results or not results[0]:
             return None
         
-        # 标题栏里可能有多段文字（比如名字 + 在线状态），取最长的那个作为名字
-        best_text = ""
-        for el in results[0]:
-            text = el[1][0].strip()
-            if len(text) > len(best_text):
-                best_text = text
+        # 长名字可能会被 OCR 引擎在内部切割成多块文字（比如遇到空格或标点）
+        # 我们按照 X 坐标（从左到右）将它们强制拼接起来还原完整名字
+        elements = results[0]
+        elements.sort(key=lambda item: item[0][0][0])
         
-        return best_text if best_text else None
+        full_text = "".join([el[1][0].strip() for el in elements])
+        
+        return full_text if full_text else None
 
     def find_contact_in_list(self, session_img):
         """

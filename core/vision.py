@@ -156,7 +156,7 @@ class VisionEngine:
 
         log("🚀 开始坐标校准流程...")
         log("📋 校准操作指南：")
-        log("  1. 会弹出3个图片窗口，请用鼠标框选指定的区域")
+        log("  1. 会弹出4个图片窗口，请用鼠标依次框选指定的区域")
         log("  2. 按住鼠标左键拖动来画框，框选好后松开")
         log("  3. 按【回车键】或【空格键】确认当前选择")
         log("  4. 如果框选错误，按【C】键清空重新选择")
@@ -178,43 +178,56 @@ class VisionEngine:
         log("✅ 截图完成！现在开始框选坐标...")
         
         # 步骤 1：让用户圈出【左侧会话列表】
-        log("🎯 步骤 1/3：请框选【左侧会话列表区域】")
+        log("🎯 步骤 1/4：请框选【左侧会话列表区域】")
         log("   这是显示所有聊天联系人的区域，包含头像和名字")
         roi_session = cv2.selectROI(
-            "Step 1/3 - Select Session List (Enter Confirm / C Reset)",
+            "Step 1/4 - Select Session List (Enter Confirm / C Reset)",
             img_full_bgr, showCrosshair=True, fromCenter=False
         )
-        cv2.destroyWindow("Step 1/3 - Select Session List (Enter Confirm / C Reset)")
+        cv2.destroyWindow("Step 1/4 - Select Session List (Enter Confirm / C Reset)")
         if roi_session == (0,0,0,0):
              log("❌ 用户取消了会话列表区域的框选")
              return False
         log("✅ 步骤1完成！会话列表区域已记录")
         
         # 步骤 2：聊天气泡记录详情大区 (最核心解析文字的地方)
-        log("🎯 步骤 2/3：请框选【右侧聊天内容区域】")
+        log("🎯 步骤 2/4：请框选【右侧聊天内容区域】")
         log("   这是显示聊天消息内容的区域，包含发送的消息气泡")
         roi_chat = cv2.selectROI(
-            "Step 2/3 - Select Chat Content (Enter Confirm / C Reset)",
+            "Step 2/4 - Select Chat Content (Enter Confirm / C Reset)",
             img_full_bgr, showCrosshair=True, fromCenter=False
         )
-        cv2.destroyWindow("Step 2/3 - Select Chat Content (Enter Confirm / C Reset)")
+        cv2.destroyWindow("Step 2/4 - Select Chat Content (Enter Confirm / C Reset)")
         if roi_chat == (0,0,0,0):
              log("❌ 用户取消了聊天内容区域的框选")
              return False
         log("✅ 步骤2完成！聊天内容区域已记录")
              
         # 步骤 3：底部聊天输入框圈点
-        log("🎯 步骤 3/3：请框选【底部输入框区域】")
+        log("🎯 步骤 3/4：请框选【底部输入框区域】")
         log("   这是最底部的输入框，用于输入和发送消息")
         roi_input = cv2.selectROI(
-            "Step 3/3 - Select Input Box (Enter Confirm / C Reset)",
+            "Step 3/4 - Select Input Box (Enter Confirm / C Reset)",
             img_full_bgr, showCrosshair=True, fromCenter=False
         )
-        cv2.destroyWindow("Step 3/3 - Select Input Box (Enter Confirm / C Reset)")
+        cv2.destroyWindow("Step 3/4 - Select Input Box (Enter Confirm / C Reset)")
         if roi_input == (0,0,0,0):
              log("❌ 用户取消了输入框区域的框选")
              return False
         log("✅ 步骤3完成！输入框区域已记录")
+
+        # 步骤 4：顶部聊天标题栏圈点
+        log("🎯 步骤 4/4：请框选【上方聊天标题栏区域】")
+        log("   这是聊天框正上方显示当前联系人完整名字的区域（尽量画宽一点以容纳长名字）")
+        roi_title = cv2.selectROI(
+            "Step 4/4 - Select Chat Title Bar (Enter Confirm / C Reset)",
+            img_full_bgr, showCrosshair=True, fromCenter=False
+        )
+        cv2.destroyWindow("Step 4/4 - Select Chat Title Bar (Enter Confirm / C Reset)")
+        if roi_title == (0,0,0,0):
+             log("❌ 用户取消了上方聊天标题栏区域的框选")
+             return False
+        log("✅ 步骤4完成！聊天标题栏已记录")
 
         # 计算输入框的几何中心点
         input_center_x = roi_input[0] + roi_input[2] // 2
@@ -222,12 +235,12 @@ class VisionEngine:
 
         # 写入配置文件并且保存注释不被抹杀
         log("💾 正在保存校准数据到配置文件...")
-        self._save_calibration_to_yaml(roi_session, roi_chat, (input_center_x, input_center_y))
+        self._save_calibration_to_yaml(roi_session, roi_chat, (input_center_x, input_center_y), roi_title)
         log("🎉 校准完成！所有坐标已保存到 config.yaml")
         log("✅ 现在可以启动 AI 助手了")
         return True
 
-    def _save_calibration_to_yaml(self, session, chat, input_center):
+    def _save_calibration_to_yaml(self, session, chat, input_center, title):
         """基于正则文本替换，保留原有 config.yaml 文件内的大量人工注释"""
         with open(self.config_path, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -236,22 +249,38 @@ class VisionEngine:
         session_list = list(session)
         chat_list = list(chat)
         center_list = list(input_center)
+        title_list = list(title)
 
         content = re.sub(
             r"session_list_rect:\s*\[.*?\]",
             f"session_list_rect: {session_list}",
-            content
+            content, flags=re.DOTALL
         )
         content = re.sub(
             r"chat_content_rect:\s*\[.*?\]",
             f"chat_content_rect: {chat_list}",
-            content
+            content, flags=re.DOTALL
         )
         content = re.sub(
             r"input_box_center:\s*\[.*?\]",
             f"input_box_center: {center_list}",
-            content
+            content, flags=re.DOTALL
         )
+        
+        # 匹配可能存在的 chat_title_rect，如果没有则在 input_box_center 前插入
+        if "chat_title_rect:" in content:
+            content = re.sub(
+                r"chat_title_rect:\s*\[.*?\]",
+                f"chat_title_rect: {title_list}",
+                content, flags=re.DOTALL
+            )
+        else:
+            # 插入到 window 配置块中
+            content = re.sub(
+                r"(input_box_center:\s*\[.*?\])",
+                f"chat_title_rect: {title_list}\n  \\1",
+                content, flags=re.DOTALL
+            )
 
         with open(self.config_path, 'w', encoding='utf-8') as f:
             f.write(content)

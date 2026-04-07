@@ -22,7 +22,11 @@
 │   └── knowledge/          # 【规划中】本地 RAG 知识文档库，Agent 会依据联系人读取相关文献
 │
 ├── ui/                     # 🖥️ 图形化控制台界面 (Frontend)
-│   └── (空)                # 【规划中】未来使用 React/Electron 或 PyQt 构建的控制台代码
+│   ├── index.html          # 主页面（桌面宽屏仪表盘布局，暗色玻璃拟态主题）
+│   ├── css/                # 样式文件目录
+│   │   └── main.css        # 主样式表（333行，深色玻璃拟态主题、动画、组件样式）
+│   └── js/                 # 脚本文件目录
+│       └── app.js          # 主应用脚本（1294行，pywebview桥接、业务逻辑、UI交互）
 │
 ├── main.py                 # 🚀 全局总管级入口脚本。负责调度 ui 或者直接运行 core/engine.py
 ├── requirements.txt        # 项目依赖库清单

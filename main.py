@@ -74,6 +74,9 @@ class AppApi:
             with open(self.config_path, 'w', encoding='utf-8') as f:
                 yaml.dump(config, f, allow_unicode=True, default_flow_style=False, sort_keys=False)
 
+            # 热更新引擎的内存状态
+            self.engine.work_mode = mode
+
             return {"status": "ok", "msg": f"已切换到{'自动' if mode == 'auto' else '辅助'}模式"}
         except Exception as e:
             return {"status": "error", "msg": f"设置工作模式失败: {str(e)}"}
@@ -981,8 +984,8 @@ if __name__ == "__main__":
         title="WeChat.AI 控制台",
         url=f"file://{ui_path}",
         js_api=api,
-        width=1024,
-        height=720,
+        width=360,
+        height=700,
         resizable=True,
         frameless=True,      # 去掉原生标题栏
         easy_drag=True        # 允许拖拽移动窗口

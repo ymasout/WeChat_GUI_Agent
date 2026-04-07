@@ -4,394 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>WeChat.AI</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
-        :root {
-            /* 暗色玻璃拟态 (Dark Glassmorphism) 主题 */
-            --bg-unified: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-            --bg-texture: radial-gradient(ellipse at 50% -20%, rgba(124, 58, 237, 0.15), transparent 60%);
-
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #64748b;
-
-            --accent-blue: #3b82f6;
-            --accent-green: #10b981;
-            --accent-orange: #f59e0b;
-            --accent-pink: #ec4899;
-            --accent-purple: #8b5cf6;
-            --accent-red: #ef4444;
-
-            --bg-surface: rgba(30, 41, 59, 0.5);
-            --bg-hover: rgba(51, 65, 85, 0.6);
-            --bg-active: rgba(59, 130, 246, 0.2);
-            --bg-card: rgba(15, 23, 42, 0.6);
-
-            --border-light: rgba(255, 255, 255, 0.08);
-            --border-medium: rgba(255, 255, 255, 0.12);
-            --border-dark: rgba(255, 255, 255, 0.2);
-
-            --shadow-md: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
-            --shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
-            
-            --radius-sm: 8px;
-            --radius: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-            --radius-pill: 9999px;
-
-            --transition-fast: 0.15s ease;
-            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html, body { width: 100%; height: 100%; overflow: hidden; margin: 0; padding: 0; }
-        body {
-            font-family: 'Inter', system-ui, sans-serif;
-            background: var(--bg-unified);
-            color: var(--text-primary);
-            display: flex;
-            user-select: none;
-            position: relative;
-        }
-        /* 全局自定义滚动条 */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.15); }
-        body::before {
-            content: ''; position: absolute; inset: 0;
-            background: var(--bg-texture); pointer-events: none; z-index: -1;
-        }
-
-        /* 侧边栏 */
-        .sidebar {
-            width: 240px; flex-shrink: 0;
-            background: rgba(15, 23, 42, 0.7);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-right: 1px solid var(--border-light);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 14px 16px;
-            z-index: 10;
-            -webkit-app-region: drag;
-        }
-        .sidebar > * { -webkit-app-region: no-drag; }
-
-        .brand {
-            display: flex; align-items: center; gap: 12px;
-            margin-bottom: 32px; padding: 0 8px;
-        }
-        .app-logo {
-            width: 36px; height: 36px; border-radius: 10px;
-            background: #07c160; display: flex; align-items: center; justify-content: center;
-            box-shadow: 0 0 15px rgba(7, 193, 96, 0.2);
-            transition: all var(--transition-smooth);
-        }
-        .app-logo svg { width: 22px; height: 22px; }
-        .app-logo.running { animation: logoPulse 2s infinite; }
-        @keyframes logoPulse { 50% { box-shadow: 0 0 25px rgba(7, 193, 96, 0.6); } }
-        
-        .brand-text { flex: 1; }
-        .brand-title { font-weight: 700; font-size: 16px; letter-spacing: -0.5px; }
-        .status-group { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
-        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-muted); }
-        .status-dot.online { background: var(--accent-green); box-shadow: 0 0 8px var(--accent-green); }
-        .status-label { font-size: 11px; color: var(--text-muted); font-weight: 500; }
-
-        .tab-nav { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-        .tab-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 12px 16px; border-radius: var(--radius);
-            color: var(--text-secondary); cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        .tab-item:hover { background: var(--bg-hover); color: var(--text-primary); }
-        .tab-item.active { background: var(--bg-active); color: var(--accent-blue); font-weight: 600; }
-        .tab-item svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; flex-shrink: 0; }
-
-        .btn-launch {
-            display: flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 14px; border-radius: var(--radius-lg); border: none;
-            font-size: 15px; font-weight: 600; cursor: pointer; color: white;
-            transition: all var(--transition-smooth); margin-top: auto;
-        }
-        .btn-launch.start { background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple)); box-shadow: 0 4px 15px rgba(59,130,246,0.4); }
-        .btn-launch.start:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(59,130,246,0.6); }
-        .btn-launch.stop { background: var(--accent-pink); box-shadow: 0 4px 15px rgba(236,72,153,0.4); }
-        .btn-launch.stop:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(236,72,153,0.6); }
-        .btn-launch svg { width: 18px; height: 18px; fill: currentColor; }
-
-        /* 主内容区 */
-        .main-container {
-            flex: 1; display: flex; flex-direction: column; position: relative;
-            background: transparent; min-width: 0; overflow: hidden;
-        }
-        .top-bar {
-            height: 60px; display: flex; align-items: center; justify-content: flex-end;
-            padding: 0 24px; flex-shrink: 0; gap: 12px; -webkit-app-region: drag;
-        }
-        .top-bar > * { -webkit-app-region: no-drag; }
-        
-        .icon-btn {
-            width: 32px; height: 32px; border-radius: var(--radius-sm); border: 1px solid var(--border-light);
-            background: var(--bg-surface); color: var(--text-secondary); display: flex; align-items: center; justify-content: center;
-            cursor: pointer; transition: all 0.2s;
-        }
-        .icon-btn:hover { background: var(--bg-hover); color: var(--text-primary); }
-        .icon-btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; }
-        
-        .win-btn { width: 14px; height: 14px; border-radius: 50%; border: none; cursor: pointer; position: relative; display: flex; align-items: center; justify-content: center; }
-        .win-btn.close { background: #ff5f57; } .win-btn.minimize { background: #ffbd2e; margin-left:8px; }
-        .win-btn svg { width: 8px; height: 8px; opacity: 0; transition: 0.2s; stroke: #000; stroke-width: 2; stroke-linecap: round; }
-        .win-btn:hover svg { opacity: 0.6; }
-
-        .panel { display: none; flex: 1; flex-direction: column; overflow-y: auto; overflow-x: hidden; padding: 0 24px 24px; animation: fadeIn 0.3s ease; min-height: 0; }
-        .panel.active { display: flex; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* 统一卡片样式 */
-        .config-card {
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-md);
-            backdrop-filter: blur(10px); margin-bottom: 20px; transition: all 0.3s;
-        }
-        .config-card:hover { border-color: var(--border-medium); }
-        .card-header {
-            display: flex; align-items: center; gap: 10px; padding: 16px 20px;
-            background: rgba(0,0,0,0.2); border-bottom: 1px solid var(--border-light);
-        }
-        .card-header svg { width: 18px; height: 18px; stroke: var(--accent-blue); fill: none; stroke-width: 2; flex-shrink: 0; }
-        .card-header span { font-size: 15px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .card-body { padding: 20px; }
-
-        /* 监控面板特殊布局 */
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; flex-shrink: 0; }
-        .dash-card {
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg); padding: 16px; display: flex; align-items: center; justify-content: space-between;
-        }
-        .dash-card-title { font-size: 13px; color: var(--text-muted); font-weight: 500; margin-bottom: 4px; }
-        
-        .chip {
-            display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
-            background: var(--bg-surface); border: 1px solid var(--border-light);
-            border-radius: var(--radius-pill); font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
-        .chip:hover { background: var(--bg-hover); border-color: var(--border-medium); }
-        .chip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent-blue); box-shadow: 0 0 8px var(--accent-blue); }
-
-        .mode-toggle {
-            display: inline-flex; align-items: center; gap: 10px; padding: 6px;
-            background: var(--bg-surface); border: 1px solid var(--border-light); border-radius: var(--radius-pill); cursor: pointer;
-        }
-        .toggle-text { font-size: 13px; font-weight: 600; padding: 4px 12px; border-radius: var(--radius-pill); transition: 0.2s; color: var(--text-muted); }
-        .mode-toggle.auto .toggle-text.auto, .mode-toggle.assist .toggle-text.assist { background: var(--bg-active); color: var(--accent-blue); }
-        .mode-toggle.assist .toggle-text.assist { background: rgba(245, 158, 11, 0.2); color: var(--accent-orange); }
-
-        .content-area#logArea {
-            flex: 1; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg); padding: 16px; overflow-y: auto; font-family: 'Consolas', monospace;
-        }
-        .log-entry { margin-bottom: 8px; font-size: 13px; line-height: 1.5; color: var(--text-secondary); display: flex; gap: 8px; align-items: flex-start; animation: fadeUp 0.3s ease; }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .log-icon { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 700; color: #fff; background: var(--text-muted); flex-shrink: 0; margin-top: 2px; }
-        .log-icon.info { background: var(--accent-blue); } .log-icon.ok { background: var(--accent-green); }
-        .log-icon.warn { background: var(--accent-orange); } .log-icon.reply { background: var(--accent-purple); }
-        .log-icon.find { background: var(--accent-pink); }
-        .log-entry.type-system { color: var(--text-muted); justify-content: center; font-style: italic; background: none; box-shadow: none; border: none; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 8px; animation: none; }
-
-        /* 表单与输入 */
-        .form-group { margin-bottom: 16px; }
-        .form-group label { display: block; font-size: 13px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
-        .form-input {
-            width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium);
-            border-radius: var(--radius); background: rgba(0,0,0,0.2); color: var(--text-primary);
-            font-size: 14px; outline: none; transition: 0.2s;
-        }
-        .form-input:focus, .form-select:focus { border-color: var(--accent-blue); box-shadow: 0 0 0 3px rgba(59,130,246,0.2); }
-        .form-select {
-            width: 100%; padding: 12px 16px; border: 1px solid var(--border-medium);
-            border-radius: var(--radius); background-color: rgba(0,0,0,0.2); color: var(--text-primary);
-            font-size: 14px; outline: none; transition: 0.2s;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23cbd5e1' d='M6 8.5L2.5 5h7z'/%3E%3C/svg%3E"); 
-            appearance: none; background-repeat: no-repeat; background-position: right 14px center; 
-        }
-        .form-select option { background: #1e293b; color: #f8fafc; }
-        .form-hint { display: block; font-size: 12px; color: var(--text-muted); margin-top: 6px; }
-        .required { color: var(--accent-red); }
-
-        .slider { width: 100%; height: 6px; background-color: rgba(255,255,255,0.1); border-radius: 3px; outline: none; -webkit-appearance: none; appearance: none; }
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 18px; height: 18px; border-radius: 50%; background-color: var(--accent-blue); cursor: pointer; transition: 0.2s; }
-        .slider::-webkit-slider-thumb:hover { transform: scale(1.2); box-shadow: 0 0 10px var(--accent-blue); }
-
-        .btn-save, .btn-reset, .btn-calibrate, .btn-add-model {
-            display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-            padding: 10px 16px; border: none; border-radius: var(--radius);
-            font-size: 14px; font-weight: 600; cursor: pointer; transition: 0.2s;
-        }
-        .btn-add-model {
-            white-space: nowrap; flex-shrink: 0;
-        }
-        .btn-save, .btn-add-model { background: var(--accent-blue); color: white; }
-        .btn-save:hover, .btn-add-model:hover { background: #2563eb; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(59,130,246,0.3); }
-        .btn-reset { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-medium); }
-        .btn-reset:hover { background: var(--bg-hover); }
-        .btn-calibrate { background: var(--accent-green); color: white; width: 100%; padding: 14px; font-size: 15px; }
-        .btn-calibrate:hover { background: #059669; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(16,185,129,0.3); }
-        .action-buttons { display: flex; gap: 12px; margin-top: 20px; }
-        .action-buttons button { flex: 1; }
-
-        .input-with-toggle { position: relative; }
-        .toggle-btn { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted); cursor: pointer; }
-        .toggle-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; }
-
-        /* 人设分栏布局 (Master-Detail) */
-        .split-layout { display: flex; flex-direction: row !important; gap: 20px; align-items: flex-start; }
-        .split-left {
-            width: 280px; min-width: 280px; max-width: 280px; flex-shrink: 0; overflow-y: auto;
-            background: var(--bg-card); border: 1px solid var(--border-light);
-            border-radius: var(--radius-lg); box-shadow: var(--shadow-md);
-            backdrop-filter: blur(10px);
-        }
-        .split-left::-webkit-scrollbar { width: 4px; }
-        .split-left::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-        .split-right { flex: 1; min-width: 0; overflow-y: auto; }
-        .split-right::-webkit-scrollbar { width: 4px; }
-        .split-right::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-
-        /* 右侧占位引导面板 */
-        .split-placeholder {
-            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            background: var(--bg-card); border: 2px dashed var(--border-medium);
-            border-radius: var(--radius-lg); padding: 40px; text-align: center;
-            min-height: 300px;
-        }
-        .split-placeholder svg { width: 56px; height: 56px; stroke: var(--text-muted); fill: none; stroke-width: 1.2; opacity: 0.3; margin-bottom: 16px; }
-        .split-placeholder .ph-title { font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 8px; }
-        .split-placeholder .ph-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; max-width: 260px; }
-
-        /* 强制保持 Master-Detail 左栏始终可见 */
-        #templatesList, #contactsList { display: block !important; }
-
-        .model-item {
-            background: var(--bg-surface); border: 1px solid var(--border-medium);
-            border-radius: var(--radius); padding: 12px 16px; display: flex; align-items: center; gap: 12px;
-            transition: all 0.2s; cursor: pointer; margin-bottom: 8px;
-        }
-        .model-item:hover { background: var(--bg-hover); border-color: var(--border-dark); }
-        .model-item.current { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
-        .model-icon { width: 36px; height: 36px; border-radius: var(--radius-sm); background: var(--accent-purple); display: flex; align-items: center; justify-content: center; font-weight: 700; color: #fff; flex-shrink: 0; }
-        .model-info { flex: 1; min-width: 0; }
-        .model-name { font-weight: 600; font-size: 14px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .model-provider { font-size: 12px; color: var(--text-muted); }
-        .btn-icon-small {
-            width: 28px; height: 28px; border-radius: var(--radius-sm); background: transparent; border: 1px solid transparent;
-            color: var(--text-secondary); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: 0.2s;
-        }
-        .btn-icon-small:hover { background: rgba(255,255,255,0.1); color: #fff; }
-        .btn-icon-small.delete:hover { background: rgba(239,68,68,0.2); color: var(--accent-red); }
-        .btn-icon-small svg { width: 14px; height: 14px; stroke: currentColor; stroke-width: 2; fill: none; }
-
-        /* 模型操作按钮组 & 徽章 & 空状态 */
-        .model-actions { display: flex; gap: 4px; align-items: center; flex-shrink: 0; }
-        .model-badge { font-size: 11px; font-weight: 600; color: var(--accent-blue); background: rgba(59,130,246,0.15); padding: 2px 8px; border-radius: var(--radius-pill); white-space: nowrap; }
-        .selector-badge { font-size: 11px; font-weight: 600; color: var(--accent-green); background: rgba(16,185,129,0.15); padding: 2px 8px; border-radius: var(--radius-pill); }
-        .empty-models { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 20px; color: var(--text-muted); text-align: center; }
-        .empty-models svg { width: 40px; height: 40px; stroke: currentColor; fill: none; stroke-width: 1.5; opacity: 0.4; margin-bottom: 12px; }
-        .empty-text { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-        .empty-hint { font-size: 12px; opacity: 0.7; }
-        .loading-models { padding: 20px; text-align: center; color: var(--text-muted); font-size: 14px; }
-
-        .calibration-status { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: var(--radius); }
-        .status-icon { width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 700; flex-shrink: 0; }
-        .status-icon.ok { background: rgba(16,185,129,0.2); color: var(--accent-green); }
-        .status-icon.error { background: rgba(239,68,68,0.2); color: var(--accent-red); }
-        .status-title { font-weight: 600; font-size: 15px; margin-bottom: 4px; }
-        .status-desc { font-size: 13px; color: var(--text-muted); }
-
-        /* 配置页面两列网格布局 */
-        .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-
-        /* 模态框 */
-        .custom-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); z-index: 1000; align-items: center; justify-content: center; }
-        .custom-modal.active { display: flex; }
-        .modal-content { background: linear-gradient(135deg, #1e293b 0%, #1a1640 100%); border: 1px solid var(--border-dark); border-radius: var(--radius-xl); padding: 28px; width: 420px; max-width: 90vw; box-shadow: var(--shadow-lg); }
-        .modal-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-        .modal-message { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; line-height: 1.6; }
-        .modal-buttons { display: flex; justify-content: flex-end; gap: 12px; }
-        .modal-btn { padding: 8px 20px; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; border: none; transition: 0.2s; }
-        .modal-btn.primary { background: var(--accent-blue); color: #fff; }
-        .modal-btn.primary:hover { background: #2563eb; }
-        .modal-btn.secondary { background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-medium); }
-        .modal-btn.secondary:hover { background: var(--bg-hover); }
-
-        .model-selector-item { display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--border-medium); border-radius: var(--radius); margin-bottom: 8px; cursor: pointer; transition: 0.2s; }
-        .model-selector-item:hover { background: var(--bg-hover); }
-        .model-selector-item.selected { border-color: var(--accent-blue); background: rgba(59,130,246,0.1); }
-        .selector-icon { width: 36px; height: 36px; background: var(--accent-blue); border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; font-weight: 700; }
-        .selector-info { flex: 1; }
-        .selector-name { font-weight: 600; font-size: 14px; }
-        .selector-provider { font-size: 12px; color: var(--text-muted); }
-        .selector-check { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--text-muted); display: flex; align-items: center; justify-content: center; }
-        .model-selector-item.selected .selector-check { border-color: var(--accent-blue); background: var(--accent-blue); }
-        .selector-check svg { width: 12px; height: 12px; stroke: #fff; stroke-width: 3; fill: none; }
-    </style>
+    <link rel="stylesheet" href="css/main.css">
 </head>
 <body>
-    <!-- 左侧导航栏 -->
-    <div class="sidebar">
-        <div class="brand">
-            <div class="app-logo idle" id="appLogo">
-                <!-- 纯净版微信双气泡徽标 -->
-                <svg viewBox="0 0 1024 1024" fill="#ffffff">
-                    <path d="M375.5 768.1c-30.8 0-60.6-6-88.3-17.2-56.8 28.2-121.3 42.5-188.7 42.5-7.8 0-15.6-0.3-23.4-1-7.5-0.7-11.8-8.8-7.5-14.9 23.3-32.9 44.6-73.5 53.6-113.9C49.3 592.4 8 495.7 8 388 8 178 172.6 7.8 375.5 7.8c203 0 367.5 170.2 367.5 380.2 0 210-164.5 380.1-367.5 380.1z m367.6 194.5c-22.2 0-43.7-3.8-63.6-10.8-40.9 17.6-87.3 26.6-135.9 26.6-5.6 0-11.3-0.2-16.8-0.6-5.4-0.4-8.5-6-5.4-10.4 16.8-23.8 32.1-53.1 38.6-82.3-51.6-49.8-81.2-118-81.2-194 0-149.7 127-270.9 283.5-270.9 156.5 0 283.4 121.3 283.4 270.9 0 149.6-126.9 270.9-283.4 270.9-6.4 0-12.7-0.2-19-0.4z" />
-                    <circle cx="248.1" cy="253.1" r="41.2" fill="#07c160" />
-                    <circle cx="502.9" cy="253.1" r="41.2" fill="#07c160" />
-                    <circle cx="653.2" cy="586.5" r="30" fill="#07c160" />
-                    <circle cx="813.2" cy="586.5" r="30" fill="#07c160" />
-                </svg>
-            </div>
-            <div class="brand-text">
-                <div class="brand-title">WeChat.AI 控制台</div>
-                <div class="status-group">
-                    <div class="status-dot" id="statusDot"></div>
-                    <span class="status-label" id="statusLabel">等待中</span>
-                </div>
+
+    <!-- 顶部状态栏 -->
+    <div class="top-bar">
+        <div class="top-left">
+            <div class="app-logo idle" id="appLogo"></div>
+            <div class="status-group">
+                <span class="status-label" id="statusLabel">等待中</span>
+                <div class="status-dot" id="statusDot"></div>
             </div>
         </div>
-
-        <div class="tab-nav">
-            <div class="tab-item active" onclick="switchTab('panel-monitor', this)">
-                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                <span>监控大厅</span>
-            </div>
-            <div class="tab-item" onclick="switchTab('panel-persona', this)">
-                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                <span>专属人设库</span>
-            </div>
-            <div class="tab-item" onclick="switchTab('panel-settings', this)">
-                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                <span>系统配置</span>
-            </div>
-        </div>
-
-        <button class="btn-launch start" id="btnLaunch" onclick="toggleEngine()">
-            <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-            启动引擎
-        </button>
-    </div>
-
-    <!-- 主展示区 -->
-    <div class="main-container">
-        <!-- 顶部控制条 -->
-        <div class="top-bar">
+        <div class="top-right">
             <button class="icon-btn" onclick="clearLogs()" title="清屏">
                 <svg viewBox="0 0 24 24"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2m3 0v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6h14z"/></svg>
             </button>
-            <div style="width:1px;height:20px;background:var(--border-medium);"></div>
+            <div style="width:1px;height:20px;background:var(--border-light);margin:0 4px;"></div>
             <button class="win-btn minimize" onclick="minimizeApp()" title="最小化">
                 <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/></svg>
             </button>
@@ -399,1609 +29,437 @@
                 <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
         </div>
+    </div>
+
+    <div style="flex:1; display:flex; flex-direction:column; overflow:hidden;">
 
         <!-- 面板 1: 监控日志 -->
         <div id="panel-monitor" class="panel active">
-            <div class="dashboard-grid">
-                <div class="dash-card">
-                    <div>
-                        <div class="dash-card-title">当前 AI 大模型</div>
-                        <div class="chip" onclick="showModelSelector()" title="点击切换模型">
-                            <div class="chip-dot"></div>
-                            <span id="currentModelName">DeepSeek-V3</span>
-                            <span style="font-size: 10px; color: var(--text-muted); margin-left:2px;">▼</span>
-                        </div>
-                    </div>
-                    <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke: var(--text-muted); fill: none; stroke-width: 1.5; opacity: 0.5;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                </div>
-                <div class="dash-card">
-                    <div>
-                        <div class="dash-card-title">运行工作模式</div>
-                        <div class="mode-toggle" onclick="toggleWorkMode()" title="点击切换工作模式" id="workModeToggle">
-                            <span class="toggle-text auto">自动飞行</span>
-                            <span class="toggle-text assist">半辅助验证</span>
-                        </div>
-                    </div>
-                    <svg viewBox="0 0 24 24" style="width: 32px; height: 32px; stroke: var(--text-muted); fill: none; stroke-width: 1.5; opacity: 0.5;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-                </div>
-            </div>
-
-            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 12px; color: var(--text-secondary);">实时追踪终端</h3>
             <div class="content-area" id="logArea">
-                <div class="log-entry type-system">WeChat.AI 控制台已就绪，点击左侧底部「启动引擎」按钮即可开始。</div>
-            </div>
-        </div>
-
-        <!-- 面板 2: 人设库 (Master-Detail 布局) -->
-        <div id="panel-persona" class="panel">
-            <div style="display: flex; gap: 8px; margin-bottom: 20px;">
-                <button class="btn-save" id="btnTemplatesTab" onclick="switchPersonaMode('templates')" style="background: var(--bg-surface); color: var(--text-primary); border: 1px solid var(--border-medium);">模板管理</button>
-                <button class="btn-reset" id="btnContactsTab" onclick="switchPersonaMode('contacts')" style="background: rgba(0,0,0,0); border: 1px dashed var(--border-medium);">联系人专属配置</button>
+                <div class="log-entry type-system">WeChat.AI 控制台已就绪，点击底部「启动」按钮即可开始。</div>
             </div>
 
-            <!-- 模板管理区 -->
-            <div id="personaTemplatesArea">
-                <div class="split-layout">
-                    <div class="split-left">
-                        <div class="card-header" style="justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
-                                <span>内置模板库</span>
-                            </div>
-                            <button class="btn-icon-small" onclick="showAddTemplateForm()" title="添加自定义模板"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                        </div>
-                        <div class="card-body" id="templatesList" style="padding: 12px;"></div>
-                    </div>
-                    <div class="split-right config-card" id="templateForm" style="display: none; height: fit-content;">
-                        <div class="card-header"><span id="templateFormTitle">添加新模板</span></div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label>模板ID <span class="required">*</span></label>
-                                <input type="text" id="templateId" class="form-input" placeholder="例如：work_partner">
-                            </div>
-                            <div class="form-group">
-                                <label>模板名称 <span class="required">*</span></label>
-                                <input type="text" id="templateName" class="form-input" placeholder="例如：工作伙伴">
-                            </div>
-                            <div class="form-group">
-                                <label>模板描述</label>
-                                <input type="text" id="templateDescription" class="form-input" placeholder="简短描述适用场景">
-                            </div>
-                            <div class="form-group">
-                                <label>System Prompt <span class="required">*</span></label>
-                                <textarea id="templatePrompt" rows="12" class="form-input" style="font-family: monospace; resize: vertical;" placeholder="在此注入AI的核心灵魂预设..."></textarea>
-                                <small class="form-hint" id="templateCharCount">0 / 5000 字符</small>
-                            </div>
-                            <div class="action-buttons">
-                                <button class="btn-save" onclick="saveTemplate()">保存模板</button>
-                                <button class="btn-reset" onclick="hideTemplateForm()">取消</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 右侧占位引导面板 -->
-                    <div class="split-placeholder" id="templatePlaceholder">
-                        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-                        <div class="ph-title">选择或创建模板</div>
-                        <div class="ph-desc">点击左侧列表中的模板进行编辑，或点击左上角的 + 按钮创建新模板。模板可被多个联系人引用，实现一处配置、处处生效。</div>
-                    </div>
+            <div class="action-bar">
+                <button class="btn-launch start" id="btnLaunch" onclick="toggleEngine()">
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    启动
+                </button>
+                <div class="chip" onclick="showModelSelector()" style="cursor: pointer;" title="点击切换模型">
+                    <div class="chip-dot"></div>
+                    <span id="currentModelName">DeepSeek-V3</span>
+                    <span class="arrow">›</span>
                 </div>
-            </div>
-
-            <!-- 联系人配置区域 -->
-            <div id="personaContactsArea" style="display: none;">
-                <div class="split-layout">
-                    <div class="split-left">
-                        <div class="card-header" style="justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                                <span>联系人列表</span>
-                            </div>
-                            <div style="display: flex; gap: 4px;">
-                                <button class="btn-icon-small" onclick="showDefaultPersonaForm()" title="修改默认兜底人设"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg></button>
-                                <button class="btn-icon-small" onclick="showAddContactForm()" title="添加针对特定联系人的人设"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
-                            </div>
-                        </div>
-                        <div class="card-body" style="padding: 12px;">
-                            <div id="defaultPersonaDisplay" style="margin-bottom: 16px; padding: 12px; background: rgba(59,130,246,0.1); border: 1px dashed var(--accent-blue); border-radius: var(--radius-sm);">
-                                <div style="font-size: 12px; color: var(--accent-blue); margin-bottom: 4px;">⭐ 全局默认人设</div>
-                                <div id="defaultPersonaDesc" style="font-size: 13px;">适用于未命中任何配置的人</div>
-                            </div>
-                            <div id="contactsList"></div>
-                        </div>
-                    </div>
-                    <div class="split-right config-card" id="contactForm" style="display: none; height: fit-content;">
-                        <div class="card-header"><span id="contactFormTitle">联系列表配置向导</span></div>
-                        <div class="card-body">
-                            <div class="form-group">
-                                <label>目标联系人名称 <span class="required">*</span></label>
-                                <input type="text" id="contactName" class="form-input" placeholder="例如：张三（需与微信备注一致）">
-                            </div>
-                            <div class="form-group">
-                                <label>连带生效的别名名单</label>
-                                <input type="text" id="contactAliases" class="form-input" placeholder="如：李四, 王五（用逗号分隔）">
-                            </div>
-                            <div class="form-group">
-                                <label>配置源方式</label>
-                                <div style="display: flex; gap: 16px; align-items: center; margin-top: 8px;">
-                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="radio" name="personaMode" value="template" checked onclick="onContactModeChange()">
-                                        <span style="font-size: 14px;">引用现成模板</span>
-                                    </label>
-                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                                        <input type="radio" name="personaMode" value="custom" onclick="onContactModeChange()">
-                                        <span style="font-size: 14px;">完全自定义人设</span>
-                                    </label>
-                                </div>
-                            </div>
-                            
-                            <div id="contactTemplateMode">
-                                <div class="form-group">
-                                    <label>映射的模板库 <span class="required">*</span></label>
-                                    <select id="contactTemplateSelect" class="form-select" onchange="onContactTemplateChange()"></select>
-                                    <small class="form-hint" id="selectedTemplateDesc">选择后他将继承此模板特征</small>
-                                </div>
-                            </div>
-                            
-                            <div id="contactCustomMode" style="display: none;">
-                                <div class="form-group">
-                                    <label>自定义身份标签 <span class="required">*</span></label>
-                                    <input type="text" id="contactPersonaName" class="form-input" placeholder="例如：我的死党">
-                                </div>
-                                <div class="form-group">
-                                    <label>标签描述</label>
-                                    <input type="text" id="contactDescription" class="form-input" placeholder="描述此针对性人设的风格">
-                                </div>
-                                <div class="form-group">
-                                    <label>System Prompt 指令 <span class="required">*</span></label>
-                                    <textarea id="contactPrompt" rows="8" class="form-input" style="font-family: monospace;" placeholder="注入AI针对性预设..."></textarea>
-                                    <small class="form-hint" id="contactCharCount">0 / 5000 字符</small>
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="margin-top: 20px;">
-                                <label>拦截生效状态</label>
-                                <div style="display: flex; gap: 16px; align-items: center;">
-                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="contactEnabled" value="true" checked><span>拦截并自动处理</span></label>
-                                    <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;"><input type="radio" name="contactEnabled" value="false"><span>静默绕过</span></label>
-                                </div>
-                            </div>
-                            
-                            <div class="action-buttons">
-                                <button class="btn-save" onclick="saveContact()">确认保存约束</button>
-                                <button class="btn-reset" onclick="hideContactForm()">丢弃更改</button>
-                            </div>
-                        </div>
-                    </div>
-                    <!-- 联系人右侧占位引导面板 -->
-                    <div class="split-placeholder" id="contactPlaceholder">
-                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                        <div class="ph-title">选择或添加联系人</div>
-                        <div class="ph-desc">点击左侧联系人进行编辑，或点击 + 按钮添加新联系人。每位联系人可引用模板或使用完全自定义的人设配置。</div>
-                    </div>
+                <div class="mode-toggle" onclick="toggleWorkMode()" title="点击切换工作模式" id="workModeToggle">
+                    <span class="toggle-text-left">自动</span>
+                    <div class="toggle-slider" id="workModeSlider"></div>
+                    <span class="toggle-text-right">辅助</span>
                 </div>
             </div>
         </div>
 
-        <!-- 面板 3: 配置 -->
+        <!-- 面板 2: 配置 -->
         <div id="panel-settings" class="panel">
-            <div class="settings-grid">
-                <!-- 左列 -->
-                <div>
-                    <!-- 核心校验模块 -->
-                    <div class="config-card">
-                        <div class="card-header"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg><span>视觉屏幕抓取基座</span></div>
-                        <div class="card-body">
-                            <div class="calibration-status" id="calibStatus">
-                                <div class="status-icon" id="calibIcon">?</div>
-                                <div>
-                                    <div class="status-title" id="calibTitle">检测中...</div>
-                                    <div class="status-desc" id="calibDesc">正在读取本地坐标索引矩阵</div>
-                                </div>
-                            </div>
-                            <button class="btn-calibrate" onclick="startCalibration()">
-                                <svg viewBox="0 0 24 24" style="width: 20px; height: 20px;"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                                重新校准屏幕捕捉区域
-                            </button>
-                            <small class="form-hint" style="text-align: center; margin-top: 12px; opacity: 0.7;">首次安装或微信窗口被拉伸过，需点击此处覆盖画框</small>
-                        </div>
-                    </div>
+            <div class="content-area" style="padding: 16px;">
 
-                    <!-- 参数干预策略 -->
-                    <div class="config-card">
-                        <div class="card-header"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>人类行为拟态及防封策略参数</span></div>
-                        <div class="card-body">
+                <!-- 窗口配置卡片 -->
+                <div class="config-card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+                        <span>窗口坐标配置</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="calibration-status" id="calibStatus">
+                            <div class="status-icon" id="calibIcon">?</div>
+                            <div class="status-info">
+                                <div class="status-title" id="calibTitle">检测中...</div>
+                                <div class="status-desc" id="calibDesc">正在读取坐标配置</div>
+                            </div>
+                        </div>
+                        <button class="btn-calibrate" onclick="startCalibration()">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                            一键校准坐标
+                        </button>
+                        <small class="form-hint" style="margin-top: 8px; display: block;">
+                            📋 校准流程：会弹出3个窗口，依次框选会话列表、聊天区域、输入框
+                        </small>
+                    </div>
+                </div>
+
+                <!-- LLM 配置卡片 -->
+                <div class="config-card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+                        <span>AI 模型配置</span>
+                        <button class="btn-add-model" onclick="showAddModelForm()" style="margin-left: auto;">
+                            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            添加模型
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- 模型列表容器 -->
+                        <div id="modelsList">
+                            <div class="loading-models">正在加载模型配置...</div>
+                        </div>
+
+                        <!-- 添加/编辑模型表单（默认隐藏） -->
+                        <div id="modelForm" style="display: none;">
+                            <h4 id="modelFormTitle" style="margin-bottom: 16px; color: var(--text-primary);">添加新模型</h4>
+
                             <div class="form-group">
-                                <label>随机纠偏容错率（当前 <span id="typoValue">2%</span>）</label>
-                                <input type="range" id="typoRate" min="0" max="10" step="1" value="2" class="slider" oninput="updateTypoValue(this.value)">
+                                <label>模型名称 <span class="required">*</span></label>
+                                <input type="text" id="modelName" placeholder="例如：我的 DeepSeek V3" class="form-input">
                             </div>
-                            <div class="form-group" style="margin-top: 24px;">
-                                <label>光学字符识别置信度底线（当前 <span id="ocrValue">0.7</span>）</label>
-                                <input type="range" id="ocrThreshold" min="0.1" max="1.0" step="0.05" value="0.7" class="slider" oninput="updateOcrValue(this.value)">
+
+                            <div class="form-group">
+                                <label>模型 ID <span class="required">*</span></label>
+                                <input type="text" id="modelId" placeholder="例如：my_deepseek_v3" class="form-input">
+                                <small class="form-hint">用于唯一标识此模型，只能包含字母、数字、下划线和连字符</small>
                             </div>
-                            <div class="form-group" style="margin-top: 24px;">
-                                <label>AI 零响应睡眠期</label>
-                                <input type="text" id="sleepHours" class="form-input" placeholder="00:00-07:00">
-                                <small class="form-hint">屏蔽所有在此期间触发的消息投喂 (格式 HH:MM-HH:MM)</small>
+
+                            <div class="form-group">
+                                <label>提供商 <span class="required">*</span></label>
+                                <select id="modelProvider" class="form-select" onchange="onModelProviderChange()">
+                                    <option value="deepseek">DeepSeek (深度求索)</option>
+                                    <option value="openai">OpenAI (GPT-4/GPT-3.5)</option>
+                                    <option value="gemini">Google Gemini</option>
+                                    <option value="zhipu">智谱AI (GLM-4)</option>
+                                    <option value="moonshot">Moonshot (月之暗面)</option>
+                                    <option value="custom">自定义配置</option>
+                                </select>
                             </div>
+
+                            <div class="form-group">
+                                <label>API Key <span class="required">*</span></label>
+                                <div class="input-with-toggle">
+                                    <input type="password" id="apiKey" placeholder="粘贴你的 API Key" class="form-input">
+                                    <button class="toggle-btn" onclick="togglePasswordVisibility('apiKey')">
+                                        <svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    </button>
+                                </div>
+                                <small class="form-hint" id="apiKeyHint">获取方式：访问 https://platform.deepseek.com</small>
+                            </div>
+
+                            <div class="form-group" id="customConfigGroup" style="display: none;">
+                                <label>API Base URL</label>
+                                <input type="text" id="baseUrl" placeholder="https://api.example.com/v1" class="form-input">
+                            </div>
+
+                            <div class="form-group" id="customModelGroup" style="display: none;">
+                                <label>模型名称</label>
+                                <input type="text" id="model" placeholder="gpt-4" class="form-input">
+                            </div>
+
+                            <div class="model-info" id="modelInfo">
+                                <strong>当前配置：</strong>
+                                <span id="currentModelConfig">DeepSeek V3 (deepseek-chat)</span>
+                            </div>
+
                             <div class="action-buttons">
-                                <button class="btn-save" onclick="saveConfig()">覆盖参数至硬盘</button>
-                                <button class="btn-reset" onclick="resetConfig()">清空并回退默认值</button>
+                                <button class="btn-save" onclick="saveModel()">
+                                    <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                    保存模型
+                                </button>
+                                <button class="btn-reset" onclick="hideModelForm()">
+                                    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                    取消
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 右列：LLM集市 -->
-                <div>
-                    <div class="config-card" style="height: 100%; display: flex; flex-direction: column;">
-                        <div class="card-header" style="justify-content: space-between;">
-                            <div style="display: flex; align-items: center; gap: 8px;">
-                                <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                                <span>LLM 推理大脑集市节点</span>
-                            </div>
-                            <button class="btn-add-model" onclick="showAddModelForm()"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>接入新节点</button>
+                <!-- OCR 配置卡片 -->
+                <div class="config-card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+                        <span>OCR 识别配置</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>置信度阈值: <span id="ocrValue">0.7</span></label>
+                            <input type="range" id="ocrThreshold" min="0.1" max="1.0" step="0.05" value="0.7" class="slider" oninput="updateOcrValue(this.value)">
                         </div>
-                        <div class="card-body" style="flex:1;">
-                            <div id="modelsList"><div class="loading-models">寻址中...</div></div>
+                    </div>
+                </div>
 
-                            <div id="modelForm" style="display: none;">
-                                <h4 id="modelFormTitle" style="margin-bottom: 20px;">节点挂载参数设置</h4>
-                                <div class="form-group"><label>节点本地标识名 <span class="required">*</span></label><input type="text" id="modelName" class="form-input" placeholder="例：DeepSeek 主力"></div>
-                                <div class="form-group"><label>系统内部映射 ID <span class="required">*</span></label><input type="text" id="modelId" class="form-input" placeholder="例：ds_main_1"></div>
+                <!-- 防风控配置卡片 -->
+                <div class="config-card">
+                    <div class="card-header">
+                        <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                        <span>防风控配置</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>错别字率: <span id="typoValue">2%</span></label>
+                            <input type="range" id="typoRate" min="0" max="10" step="1" value="2" class="slider" oninput="updateTypoValue(this.value)">
+                        </div>
+                        <div class="form-group">
+                            <label>睡眠时间段</label>
+                            <input type="text" id="sleepHours" placeholder="00:00-07:00" class="form-input">
+                            <small class="form-hint">设置 AI 休息时间段，格式：HH:MM-HH:MM</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 保存按钮 -->
+                <div class="action-buttons">
+                    <button class="btn-save" onclick="saveConfig()">
+                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        保存配置
+                    </button>
+                    <button class="btn-reset" onclick="resetConfig()">
+                        <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9 9.75 9.75 0 00-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+                        重置默认
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- 面板 3: 人设 -->
+        <div id="panel-persona" class="panel">
+            <div class="content-area" style="padding: 16px;">
+
+                <!-- 人设模式切换 -->
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button class="btn-save" id="btnTemplatesTab" onclick="switchPersonaMode('templates')" style="flex: 1;">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+                        模板管理
+                    </button>
+                    <button class="btn-reset" id="btnContactsTab" onclick="switchPersonaMode('contacts')" style="flex: 1;">
+                        <svg viewBox="0 0 24 24" style="width: 16px; height: 16px;"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                        联系人配置
+                    </button>
+                </div>
+
+                <!-- 模板管理区域 -->
+                <div id="personaTemplatesArea">
+                    <!-- 人设模板卡片 -->
+                    <div class="config-card">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
+                            <span>人设模板管理</span>
+                            <button class="btn-add-model" onclick="showAddTemplateForm()" style="margin-left: auto;">
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                添加模板
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="templatesList">
+                                <div class="loading-models">正在加载模板...</div>
+                            </div>
+
+                            <!-- 添加/编辑模板表单（默认隐藏） -->
+                            <div id="templateForm" style="display: none;">
+                                <h4 id="templateFormTitle" style="margin-bottom: 16px; color: var(--text-primary);">添加新模板</h4>
+
                                 <div class="form-group">
-                                    <label>云端供应商 <span class="required">*</span></label>
-                                    <select id="modelProvider" class="form-select" onchange="onModelProviderChange()">
-                                        <option value="deepseek">DeepSeek (深度求索)</option>
-                                        <option value="openai">OpenAI (GPT 系列)</option>
-                                        <option value="gemini">Google Gemini</option>
-                                        <option value="zhipu">智谱AI (GLM 系列)</option>
-                                        <option value="moonshot">Moonshot (Kimi)</option>
-                                        <option value="custom">自托管 / 第三方路由转发</option>
-                                    </select>
+                                    <label>模板ID <span class="required">*</span></label>
+                                    <input type="text" id="templateId" placeholder="例如：work_partner" class="form-input">
+                                    <small class="form-hint">只能包含字母、数字、下划线，用于标识模板</small>
                                 </div>
+
                                 <div class="form-group">
-                                    <label>授权密钥凭证 (API Key) <span class="required">*</span></label>
-                                    <div class="input-with-toggle">
-                                        <input type="password" id="apiKey" class="form-input" placeholder="sk-...">
-                                        <button class="toggle-btn" onclick="togglePasswordVisibility('apiKey')"><svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>
-                                    </div>
-                                    <small class="form-hint" id="apiKeyHint">点击获取指南</small>
+                                    <label>模板名称 <span class="required">*</span></label>
+                                    <input type="text" id="templateName" placeholder="例如：工作伙伴" class="form-input">
                                 </div>
-                                <div class="form-group" id="customConfigGroup" style="display: none;"><label>转发网关 URL</label><input type="text" id="baseUrl" class="form-input" placeholder="https://api.yourdomain.com/v1"></div>
-                                <div class="form-group" id="customModelGroup" style="display: none;"><label>实际调用模型体 (Model ID)</label><input type="text" id="model" class="form-input" placeholder="gpt-4"></div>
-                                
-                                <div style="margin-top: 16px; padding: 12px; background: rgba(59,130,246,0.1); border-radius: 8px;">
-                                    <span style="font-size: 13px; color: var(--text-secondary);">当前选中参数簇：</span><br/>
-                                    <span id="currentModelConfig" style="font-size: 14px; font-weight: 600; color: var(--accent-blue);"></span>
+
+                                <div class="form-group">
+                                    <label>模板描述</label>
+                                    <input type="text" id="templateDescription" placeholder="简短描述这个模板的适用场景" class="form-input">
+                                </div>
+
+                                <div class="form-group">
+                                    <label>System Prompt <span class="required">*</span></label>
+                                    <textarea id="templatePrompt" rows="8" class="form-input" style="resize: vertical; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.5;" placeholder="输入 AI 的系统人设指令..."></textarea>
+                                    <small class="form-hint" id="templateCharCount">0 / 5000 字符</small>
                                 </div>
 
                                 <div class="action-buttons">
-                                    <button class="btn-save" onclick="saveModel()">确立节点配置</button>
-                                    <button class="btn-reset" onclick="hideModelForm()">丢弃草稿</button>
+                                    <button class="btn-save" onclick="saveTemplate()">
+                                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        保存模板
+                                    </button>
+                                    <button class="btn-reset" onclick="hideTemplateForm()">
+                                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        取消
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 联系人配置区域 -->
+                <div id="personaContactsArea" style="display: none;">
+                    <!-- 联系人人设配置卡片 -->
+                    <div class="config-card">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+                            <span>联系人配置</span>
+                            <button class="btn-add-model" onclick="showAddContactForm()" style="margin-left: auto;">
+                                <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                                添加联系人
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="contactsList">
+                                <div class="loading-models">正在加载联系人配置...</div>
+                            </div>
+
+                            <!-- 添加/编辑联系人表单（默认隐藏） -->
+                            <div id="contactForm" style="display: none;">
+                                <h4 id="contactFormTitle" style="margin-bottom: 16px; color: var(--text-primary);">添加新联系人</h4>
+
+                                <div class="form-group">
+                                    <label>联系人名称（或配置组名） <span class="required">*</span></label>
+                                    <input type="text" id="contactName" placeholder="例如：张三" class="form-input">
+                                    <small class="form-hint">这是此配置的唯一标识，建议使用微信联系人名字或自定组名</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>配置适用多人（别名）</label>
+                                    <input type="text" id="contactAliases" placeholder="例如：张三, 李四, 王五" class="form-input">
+                                    <small class="form-hint">支持给多个联系人设置相同人设，用半角逗号分隔</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>配置方式</label>
+                                    <div style="display: flex; gap: 16px; align-items: center;">
+                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="personaMode" value="template" checked onclick="onContactModeChange()" style="cursor: pointer;">
+                                            <span style="font-size: 13px;">引用模板</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="personaMode" value="custom" onclick="onContactModeChange()" style="cursor: pointer;">
+                                            <span style="font-size: 13px;">自定义人设</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- 引用模板模式 -->
+                                <div id="contactTemplateMode">
+                                    <div class="form-group">
+                                        <label>选择模板 <span class="required">*</span></label>
+                                        <select id="contactTemplateSelect" class="form-select" onchange="onContactTemplateChange()">
+                                            <option value="">-- 请选择模板 --</option>
+                                        </select>
+                                        <small class="form-hint" id="selectedTemplateDesc">选择一个模板后，该联系人将使用模板的人设配置</small>
+                                    </div>
+                                </div>
+
+                                <!-- 自定义人设模式 -->
+                                <div id="contactCustomMode" style="display: none;">
+                                    <div class="form-group">
+                                        <label>人设名称 <span class="required">*</span></label>
+                                        <input type="text" id="contactPersonaName" placeholder="例如：工作伙伴" class="form-input">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>人设描述</label>
+                                        <input type="text" id="contactDescription" placeholder="简短描述这个人设的风格" class="form-input">
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>System Prompt <span class="required">*</span></label>
+                                        <textarea id="contactPrompt" rows="8" class="form-input" style="resize: vertical; font-family: 'Consolas', 'Monaco', monospace; font-size: 12px; line-height: 1.5;" placeholder="输入 AI 的系统人设指令..."></textarea>
+                                        <small class="form-hint" id="contactCharCount">0 / 5000 字符</small>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>状态</label>
+                                    <div style="display: flex; gap: 16px; align-items: center;">
+                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="contactEnabled" value="true" checked style="cursor: pointer;">
+                                            <span style="font-size: 13px;">启用</span>
+                                        </label>
+                                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                            <input type="radio" name="contactEnabled" value="false" style="cursor: pointer;">
+                                            <span style="font-size: 13px;">禁用</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="action-buttons">
+                                    <button class="btn-save" onclick="saveContact()">
+                                        <svg viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v13a2 2 0 01-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                                        保存配置
+                                    </button>
+                                    <button class="btn-reset" onclick="hideContactForm()">
+                                        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                                        取消
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 默认人设设置卡片 -->
+                    <div class="config-card">
+                        <div class="card-header">
+                            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                            <span>默认人设设置</span>
+                            <button class="btn-add-model" onclick="showDefaultPersonaForm()" style="margin-left: auto;">
+                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                编辑默认人设
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div id="defaultPersonaDisplay" style="padding: 12px; background: var(--bg-chip); border-radius: 8px; border: 1px solid var(--border-light);">
+                                <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">默认人设</div>
+                                <div id="defaultPersonaDesc" style="font-size: 14px; color: var(--text-primary);">适用于所有未配置特定人设的联系人</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </div>
 
-    <!-- 弹窗部分保持一致的功能 -->
+    <!-- 自定义弹窗 -->
     <div id="customModal" class="custom-modal">
         <div class="modal-content">
-            <div class="modal-title" id="modalTitle">系统硬件与底层提示</div>
-            <div class="modal-message" id="modalMessage"></div>
-            <div class="modal-buttons"><button class="modal-btn primary" onclick="closeModal()">我已知晓</button></div>
-        </div>
-    </div>
-
-    <!-- 模型选择器弹窗 -->
-    <div id="modelSelectorModal" class="custom-modal">
-        <div class="modal-content">
-            <div class="modal-title">网关节点热切换</div>
-            <div class="modal-message" style="margin-bottom: 20px;">
-                <div id="modelSelectorList" style="display: flex; flex-direction: column; gap: 4px;"></div>
+            <div class="modal-title" id="modalTitle">提示</div>
+            <div class="modal-message" id="modalMessage">消息内容</div>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="closeModal()">确定</button>
             </div>
-            <div class="modal-buttons"><button class="modal-btn secondary" onclick="closeModelSelector()">放弃更改</button></div>
         </div>
     </div>
 
-<script>
-        let isRunning = false;
-        let pollTimer = null;
-        const logArea = document.getElementById('logArea');
-        const btnLaunch = document.getElementById('btnLaunch');
-        const statusLabel = document.getElementById('statusLabel');
-        const statusDot = document.getElementById('statusDot');
-        const appLogo = document.getElementById('appLogo');
-
-        function switchTab(id, el) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            el.classList.add('active');
-
-            // 切换到人设页面时重新加载人设配置
-            if (id === 'panel-persona') {
-                loadTemplates();
-                loadContacts();
-            }
-        }
-
-        function appendLog(raw) {
-            let time = '', msg = raw;
-            const m = raw.match(/^\[(.*?)\]\s(.*)/s);
-            if (m) { time = m[1]; msg = m[2]; }
-
-            const el = document.createElement('div');
-            el.className = 'log-entry';
-
-            // 判断类型 & 添加小图标
-            let iconClass = 'info', iconText = 'i';
-            if (msg.includes('🗣️') || msg.includes('回复')) { iconClass = 'reply'; iconText = '↩'; }
-            else if (msg.includes('✅')) { iconClass = 'ok'; iconText = '✓'; }
-            else if (msg.includes('🎯') || msg.includes('👤') || msg.includes('🔍')) { iconClass = 'find'; iconText = '!'; }
-            else if (msg.includes('⚠️')) { iconClass = 'warn'; iconText = '⚠'; }
-            else if (msg.includes('🟢') || msg.includes('[系统]') || msg.includes('最小化')) {
-                el.className = 'log-entry type-system';
-                el.textContent = msg;
-                logArea.appendChild(el);
-                if (logArea.children.length > 150) logArea.removeChild(logArea.firstElementChild);
-                logArea.scrollTop = logArea.scrollHeight;
-                return;
-            }
-
-            const icon = document.createElement('span');
-            icon.className = 'log-icon ' + iconClass;
-            icon.textContent = iconText;
-            el.appendChild(icon);
-
-            const txt = document.createTextNode((time ? time + ' ' : '') + msg);
-            el.appendChild(txt);
-
-            logArea.appendChild(el);
-            if (logArea.children.length > 150) logArea.removeChild(logArea.firstElementChild);
-            logArea.scrollTop = logArea.scrollHeight;
-        }
-
-        function clearLogs() {
-            logArea.innerHTML = '';
-            appendLog('[系统] 终端已清理');
-        }
-
-        function minimizeApp() {
-            if (window.pywebview && window.pywebview.api) {
-                window.pywebview.api.minimize_app();
-            }
-        }
-
-        function closeApp() {
-            if (window.pywebview && window.pywebview.api) {
-                window.pywebview.api.close_app();
-            }
-        }
-
-        function pollLogs() {
-            if (window.pywebview && window.pywebview.api) {
-                window.pywebview.api.get_logs().then(logs => {
-                    if (logs && logs.length) logs.forEach(m => appendLog(m));
-                });
-            }
-        }
-
-        function setUI(running) {
-            isRunning = running;
-            if (running) {
-                statusLabel.textContent = '运行中';
-                statusDot.classList.add('online');
-                appLogo.classList.remove('idle');
-                appLogo.classList.add('running');
-                btnLaunch.className = 'btn-launch stop';
-                btnLaunch.innerHTML = '<svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg> 停止';
-            } else {
-                statusLabel.textContent = '等待中';
-                statusDot.classList.remove('online');
-                appLogo.classList.remove('running');
-                appLogo.classList.add('idle');
-                btnLaunch.className = 'btn-launch start';
-                btnLaunch.innerHTML = '<svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> 启动';
-            }
-        }
-
-        function toggleEngine() {
-            if (!window.pywebview || !window.pywebview.api) return;
-            if (!isRunning) {
-                window.pywebview.api.start_engine().then(r => {
-                    if (r.status === 'ok') {
-                        setUI(true);
-                        if (!pollTimer) pollTimer = setInterval(pollLogs, 400);
-                    }
-                });
-            } else {
-                window.pywebview.api.stop_engine().then(r => {
-                    if (r.status === 'ok') setUI(false);
-                });
-            }
-        }
-
-        window.addEventListener('pywebviewready', () => {
-            appendLog('[系统] 引擎核心已加载，所有模块待命中。');
-            setInterval(pollLogs, 1000);
-            // 加载配置
-            loadConfig();
-            // 加载模板（因为模板区域默认显示）
-            loadTemplates();
-            // 加载联系人配置
-            loadContacts();
-        });
-
-        // ===== 配置管理函数 =====
-        let currentConfig = null;
-        let modelsList = [];
-        let currentModel = null;
-        let editingModelId = null;  // 当前正在编辑的模型ID，null表示添加新模式
-
-        // 主流大模型预设配置
-        const MODEL_PRESETS = {
-            deepseek: {
-                name: 'DeepSeek V3',
-                model: 'deepseek-chat',
-                base_url: 'https://api.deepseek.com/v1',
-                hint: '获取方式：访问 https://platform.deepseek.com',
-                key_prefix: 'sk-',
-                icon: 'DS'
-            },
-            openai: {
-                name: 'OpenAI GPT-4',
-                model: 'gpt-4',
-                base_url: 'https://api.openai.com/v1',
-                hint: '获取方式：访问 https://platform.openai.com',
-                key_prefix: 'sk-',
-                icon: 'GPT'
-            },
-            gemini: {
-                name: 'Google Gemini',
-                model: 'gemini-pro',
-                base_url: 'https://generativelanguage.googleapis.com/v1beta',
-                hint: '获取方式：访问 https://ai.google.dev',
-                key_prefix: '',
-                icon: 'GM'
-            },
-            zhipu: {
-                name: '智谱AI GLM-4',
-                model: 'glm-4',
-                base_url: 'https://open.bigmodel.cn/api/paas/v4',
-                hint: '获取方式：访问 https://open.bigmodel.cn',
-                key_prefix: '',
-                icon: 'GLM'
-            },
-            moonshot: {
-                name: 'Moonshot Kimi',
-                model: 'moonshot-v1-8k',
-                base_url: 'https://api.moonshot.cn/v1',
-                hint: '获取方式：访问 https://platform.moonshot.cn',
-                key_prefix: 'sk-',
-                icon: 'MK'
-            },
-            custom: {
-                name: '自定义配置',
-                model: '',
-                base_url: '',
-                hint: '请手动填写 API Base URL 和模型名称',
-                key_prefix: '',
-                icon: 'API'
-            }
-        };
-
-        function onModelProviderChange() {
-            const provider = document.getElementById('modelProvider').value;
-            const preset = MODEL_PRESETS[provider];
-
-            // 清空 API Key（解决用户提出的问题）
-            document.getElementById('apiKey').value = '';
-
-            // 更新提示文字
-            document.getElementById('apiKeyHint').textContent = preset.hint;
-
-            // 更新当前配置显示
-            if (provider !== 'custom') {
-                document.getElementById('currentModelConfig').textContent =
-                    `${preset.name} (${preset.model})`;
-                // 隐藏自定义配置
-                document.getElementById('customConfigGroup').style.display = 'none';
-                document.getElementById('customModelGroup').style.display = 'none';
-            } else {
-                document.getElementById('currentModelConfig').textContent = '自定义配置';
-                // 显示自定义配置
-                document.getElementById('customConfigGroup').style.display = 'block';
-                document.getElementById('customModelGroup').style.display = 'block';
-            }
-        }
-
-        function loadConfig() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            window.pywebview.api.read_config().then(result => {
-                if (result.status === 'ok') {
-                    currentConfig = result.config;
-                    modelsList = result.models || [];
-                    currentModel = result.current_model;
-
-                    populateForm(result.config, result.env, result.is_calibrated);
-                    updateCalibrationStatus(result.is_calibrated);
-                    renderModelsList();
-                    updateMonitorModelDisplay();
-                    updateWorkModeDisplay();
-                } else {
-                    console.error('加载配置失败:', result.msg);
-                }
-            });
-        }
-
-        function populateForm(config, env, isCalibrated) {
-            // 填充 OCR 配置
-            const ocrThreshold = config.ocr?.confidence_threshold || 0.7;
-            document.getElementById('ocrThreshold').value = ocrThreshold;
-            document.getElementById('ocrValue').textContent = ocrThreshold;
-
-            // 填充防风控配置
-            const typoRate = config.anti_risk?.global_typo_rate || 0.02;
-            const typoPercent = Math.round(typoRate * 100);
-            document.getElementById('typoRate').value = typoPercent;
-            document.getElementById('typoValue').textContent = typoPercent + '%';
-
-            const sleepHours = config.anti_risk?.sleep_hours || '00:00-07:00';
-            document.getElementById('sleepHours').value = sleepHours;
-        }
-
-        function updateCalibrationStatus(isCalibrated) {
-            const icon = document.getElementById('calibIcon');
-            const title = document.getElementById('calibTitle');
-            const desc = document.getElementById('calibDesc');
-
-            if (isCalibrated) {
-                icon.className = 'status-icon ok';
-                icon.textContent = '✓';
-                title.textContent = '坐标已校准';
-                desc.textContent = '窗口坐标配置已完成，可以正常使用';
-            } else {
-                icon.className = 'status-icon error';
-                icon.textContent = '!';
-                title.textContent = '坐标未校准';
-                desc.textContent = '请先进行坐标校准，否则无法正常使用';
-            }
-        }
-
-        // ===== 模型列表渲染 =====
-        function renderModelsList() {
-            const container = document.getElementById('modelsList');
-
-            if (!modelsList || modelsList.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-models">
-                        <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-                        <div class="empty-text">还没有配置任何模型</div>
-                        <div class="empty-hint">点击上方"添加模型"按钮开始配置</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            modelsList.forEach(model => {
-                const preset = MODEL_PRESETS[model.provider] || MODEL_PRESETS.custom;
-                const isCurrent = currentModel && currentModel.id === model.id;
-
-                html += `
-                    <div class="model-item ${isCurrent ? 'current' : ''}">
-                        <div class="model-icon">${preset.icon}</div>
-                        <div class="model-info">
-                            <div class="model-name">${escapeHtml(model.name)}</div>
-                            <div class="model-provider">${preset.name}</div>
-                        </div>
-                        ${isCurrent ? '<div class="model-badge">当前</div>' : ''}
-                        <div class="model-actions">
-                            ${!isCurrent ? `
-                                <button class="btn-icon-small" onclick="setCurrentModel('${escapeHtml(model.id)}')" title="设为当前">
-                                    <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-                                </button>
-                            ` : ''}
-                            <button class="btn-icon-small" onclick="editModel('${escapeHtml(model.id)}')" title="编辑">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
-                            <button class="btn-icon-small delete" onclick="deleteModel('${escapeHtml(model.id)}')" title="删除">
-                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        function escapeHtml(text) {
-            const div = document.createElement('div');
-            div.textContent = text;
-            return div.innerHTML;
-        }
-
-        // ===== 模型表单操作 =====
-        function showAddModelForm() {
-            editingModelId = null;
-            document.getElementById('modelFormTitle').textContent = '添加新模型';
-            document.getElementById('modelName').value = '';
-            document.getElementById('modelId').value = '';
-            document.getElementById('modelProvider').value = 'deepseek';
-            document.getElementById('apiKey').value = '';
-            document.getElementById('baseUrl').value = '';
-            document.getElementById('model').value = '';
-            document.getElementById('customConfigGroup').style.display = 'none';
-            document.getElementById('customModelGroup').style.display = 'none';
-            onModelProviderChange();
-
-            document.getElementById('modelsList').style.display = 'none';
-            document.getElementById('modelForm').style.display = 'block';
-        }
-
-        function hideModelForm() {
-            document.getElementById('modelForm').style.display = 'none';
-            document.getElementById('modelsList').style.display = 'block';
-            editingModelId = null;
-        }
-
-        function editModel(modelId) {
-            const model = modelsList.find(m => m.id === modelId);
-            if (!model) return;
-
-            editingModelId = modelId;
-            document.getElementById('modelFormTitle').textContent = '编辑模型';
-            document.getElementById('modelName').value = model.name;
-            document.getElementById('modelId').value = model.id;
-            document.getElementById('modelProvider').value = model.provider;
-            document.getElementById('apiKey').value = model.api_key;
-            document.getElementById('baseUrl').value = model.base_url;
-            document.getElementById('model').value = model.model;
-
-            const preset = MODEL_PRESETS[model.provider];
-            if (model.provider === 'custom') {
-                document.getElementById('customConfigGroup').style.display = 'block';
-                document.getElementById('customModelGroup').style.display = 'block';
-                document.getElementById('currentModelConfig').textContent = '自定义配置';
-            } else {
-                document.getElementById('customConfigGroup').style.display = 'none';
-                document.getElementById('customModelGroup').style.display = 'none';
-                document.getElementById('currentModelConfig').textContent =
-                    `${preset.name} (${model.model})`;
-            }
-
-            document.getElementById('modelsList').style.display = 'none';
-            document.getElementById('modelForm').style.display = 'block';
-        }
-
-        function saveModel() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            // 收集表单数据
-            const modelData = {
-                name: document.getElementById('modelName').value.trim(),
-                id: document.getElementById('modelId').value.trim(),
-                provider: document.getElementById('modelProvider').value,
-                api_key: document.getElementById('apiKey').value.trim(),
-                base_url: document.getElementById('baseUrl').value.trim(),
-                model: document.getElementById('model').value.trim()
-            };
-
-            // 根据提供商预设值
-            const provider = modelData.provider;
-            const preset = MODEL_PRESETS[provider];
-
-            if (provider !== 'custom') {
-                modelData.base_url = preset.base_url;
-                modelData.model = preset.model;
-            }
-
-            // 验证
-            if (!modelData.name) {
-                showCustomAlert('请输入模型名称');
-                return;
-            }
-            if (!modelData.id) {
-                showCustomAlert('请输入模型 ID');
-                return;
-            }
-            if (!modelData.api_key) {
-                showCustomAlert('请输入 API Key');
-                return;
-            }
-
-            // 调用后端 API
-            if (editingModelId) {
-                // 更新现有模型
-                window.pywebview.api.update_model(editingModelId, modelData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('模型更新成功');
-                        hideModelForm();
-                        loadConfig(); // 重新加载配置
-                    } else {
-                        showCustomAlert('更新失败: ' + result.msg);
-                    }
-                });
-            } else {
-                // 添加新模型
-                window.pywebview.api.add_model(modelData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('模型添加成功');
-                        hideModelForm();
-                        loadConfig(); // 重新加载配置
-                    } else {
-                        showCustomAlert('添加失败: ' + result.msg);
-                    }
-                });
-            }
-        }
-
-        function deleteModel(modelId) {
-            showConfirmDialog('确定要删除这个模型配置吗？此操作不可撤销。', () => {
-                window.pywebview.api.delete_model(modelId).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('模型已删除');
-                        loadConfig(); // 重新加载配置
-                    } else {
-                        showCustomAlert('删除失败: ' + result.msg);
-                    }
-                });
-            });
-        }
-
-        function setCurrentModel(modelId) {
-            window.pywebview.api.set_current_model(modelId).then(result => {
-                if (result.status === 'ok') {
-                    showCustomAlert('已切换到该模型');
-                    loadConfig(); // 重新加载配置
-                    updateMonitorModelDisplay(); // 更新监控页面显示
-                } else {
-                    showCustomAlert('切换失败: ' + result.msg);
-                }
-            });
-        }
-
-        function updateMonitorModelDisplay() {
-            // 更新监控页面的模型显示
-            const modelChip = document.querySelector('.chip');
-            const modelNameElement = document.getElementById('currentModelName');
-            if (currentModel && modelNameElement) {
-                modelNameElement.textContent = currentModel.name;
-            }
-        }
-
-        function updateWorkModeDisplay() {
-            // 更新监控页面的工作模式显示
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            window.pywebview.api.get_work_mode().then(result => {
-                if (result.status === 'ok') {
-                    const modeToggle = document.getElementById('workModeToggle');
-                    if (modeToggle) {
-                        // 移除所有模式类
-                        modeToggle.classList.remove('auto', 'assist');
-                        // 添加当前模式类
-                        modeToggle.classList.add(result.mode);
-                    }
-                }
-            });
-        }
-
-        function toggleWorkMode() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            // 先获取当前模式，然后切换到另一种模式
-            window.pywebview.api.get_work_mode().then(result => {
-                if (result.status === 'ok') {
-                    const newMode = result.mode === 'auto' ? 'assist' : 'auto';
-
-                    // 直接切换，不需要确认对话框
-                    window.pywebview.api.set_work_mode(newMode).then(setResult => {
-                        if (setResult.status === 'ok') {
-                            // 更新显示
-                            updateWorkModeDisplay();
-
-                            // 输出提示信息到日志区域
-                            const timestamp = new Date().toLocaleTimeString('zh-CN', { hour12: false });
-                            if (newMode === 'assist') {
-                                appendLog(`[${timestamp}] [模式切换] 已切换到辅助模式 - AI将生成回复内容并粘贴到输入框，等待您手动发送`);
-                            } else {
-                                appendLog(`[${timestamp}] [模式切换] 已切换到自动模式 - AI将自动识别并回复消息，期间请勿操作鼠标键盘`);
-                            }
-                        } else {
-                            appendLog(`[${timestamp}] [错误] 切换失败: ${setResult.msg}`);
-                        }
-                    });
-                }
-            });
-        }
-
-        // ===== 模型选择器 =====
-        function showModelSelector() {
-            if (!modelsList || modelsList.length === 0) {
-                showCustomAlert('请先在配置页面添加模型');
-                return;
-            }
-
-            // 渲染模型列表
-            const container = document.getElementById('modelSelectorList');
-            let html = '';
-
-            modelsList.forEach(model => {
-                const preset = MODEL_PRESETS[model.provider] || MODEL_PRESETS.custom;
-                const isSelected = currentModel && currentModel.id === model.id;
-
-                html += `
-                    <div class="model-selector-item ${isSelected ? 'selected' : ''}"
-                         onclick="selectModelFromSelector('${escapeHtml(model.id)}')">
-                        <div class="selector-icon">${preset.icon}</div>
-                        <div class="selector-info">
-                            <div class="selector-name">${escapeHtml(model.name)}</div>
-                            <div class="selector-provider">${preset.name}</div>
-                        </div>
-                        ${isSelected ? '<div class="selector-badge">当前</div>' : ''}
-                        <div class="selector-check">
-                            ${isSelected ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : ''}
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-            document.getElementById('modelSelectorModal').classList.add('active');
-        }
-
-        function closeModelSelector() {
-            document.getElementById('modelSelectorModal').classList.remove('active');
-        }
-
-        function selectModelFromSelector(modelId) {
-            // 如果点击的是当前模型，直接关闭
-            if (currentModel && currentModel.id === modelId) {
-                closeModelSelector();
-                return;
-            }
-
-            // 切换模型
-            setCurrentModel(modelId);
-            closeModelSelector();
-        }
-
-        function updateOcrValue(value) {
-            document.getElementById('ocrValue').textContent = value;
-        }
-
-        function updateTypoValue(value) {
-            document.getElementById('typoValue').textContent = value + '%';
-        }
-
-        function togglePasswordVisibility(inputId) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-            } else {
-                input.type = 'password';
-            }
-        }
-
-        function saveConfig() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            // 收集配置数据（只保存OCR和防风控配置）
-            const configData = {
-                ocr: {
-                    confidence_threshold: parseFloat(document.getElementById('ocrThreshold').value)
-                },
-                anti_risk: {
-                    global_typo_rate: parseInt(document.getElementById('typoRate').value) / 100,
-                    sleep_hours: document.getElementById('sleepHours').value.trim()
-                }
-            };
-
-            // 保存配置
-            window.pywebview.api.update_config(configData).then(result => {
-                if (result.status === 'ok') {
-                    showCustomAlert('配置已保存！');
-                    loadConfig(); // 重新加载配置
-                } else {
-                    showCustomAlert('保存配置失败: ' + result.msg);
-                }
-            }).catch(error => {
-                showCustomAlert('保存失败: ' + error.message);
-            });
-        }
-
-        function resetConfig() {
-            if (!confirm('确定要重置为默认配置吗？（模型配置不会被重置）')) return;
-
-            // 只重置OCR和防风控配置
-            document.getElementById('ocrThreshold').value = 0.7;
-            document.getElementById('ocrValue').textContent = '0.7';
-            document.getElementById('typoRate').value = 2;
-            document.getElementById('typoValue').textContent = '2%';
-            document.getElementById('sleepHours').value = '00:00-07:00';
-
-            appendLog('[系统] 配置已重置为默认值，请点击保存按钮生效。');
-        }
-
-        function startCalibration() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            const calibInstructions =
-                '📋 坐标校准操作指南：\n\n' +
-                '1. 请确保微信客户端已打开且窗口可见\n' +
-                '2. 点击"确定"后，会依次弹出3个图片窗口\n' +
-                '3. 按住鼠标左键拖动来画框，框选指定区域\n' +
-                '4. 按回车键确认选择，按C键重置\n' +
-                '5. 完成所有步骤后，校准自动保存\n\n' +
-                '是否开始校准？';
-
-            showConfirmDialog(calibInstructions, () => {
-                // 切换到监控Tab，方便用户看到实时进度
-                switchTab('panel-monitor', document.querySelector('.tab-item'));
-
-                window.pywebview.api.start_calibration().then(result => {
-                    if (result.status === 'ok') {
-                        appendLog('[系统] 校准流程已启动，请查看日志窗口的详细指导...');
-                    } else {
-                        showCustomAlert('启动校准失败: ' + result.msg);
-                    }
-                });
-            });
-        }
-
-        // ===== 自定义弹窗函数 =====
-        function showCustomAlert(message, title = '提示') {
-            document.getElementById('modalTitle').textContent = title;
-            document.getElementById('modalMessage').textContent = message;
-            document.getElementById('customModal').classList.add('active');
-        }
-
-        function showConfirmDialog(message, onConfirm) {
-            const modal = document.getElementById('customModal');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalButtons = document.querySelector('.modal-buttons');
-
-            modalMessage.textContent = message;
-
-            // 清空按钮并重新创建
-            modalButtons.innerHTML = '';
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.className = 'modal-btn secondary';
-            cancelBtn.textContent = '取消';
-            cancelBtn.onclick = () => {
-                modal.classList.remove('active');
-                // 重置按钮
-                setTimeout(() => {
-                    modalButtons.innerHTML = '<button class="modal-btn primary" onclick="closeModal()">确定</button>';
-                }, 200);
-            };
-
-            const confirmBtn = document.createElement('button');
-            confirmBtn.className = 'modal-btn primary';
-            confirmBtn.textContent = '确定';
-            confirmBtn.onclick = () => {
-                modal.classList.remove('active');
-                onConfirm();
-                // 重置按钮
-                setTimeout(() => {
-                    modalButtons.innerHTML = '<button class="modal-btn primary" onclick="closeModal()">确定</button>';
-                }, 200);
-            };
-
-            modalButtons.appendChild(cancelBtn);
-            modalButtons.appendChild(confirmBtn);
-            modal.classList.add('active');
-        }
-
-        function closeModal() {
-            document.getElementById('customModal').classList.remove('active');
-        }
-
-        // ============================================================
-        // 联系人专属人设管理 (V1.1.1 更新：模板+联系人分离管理)
-        // ============================================================
-
-        let personasList = [];
-        let personaTemplates = {};
-        let editingTemplateId = null;  // 当前正在编辑的模板ID
-        let editingContactName = null;  // 当前正在编辑的联系人
-
-        // 模式切换
-        function switchPersonaMode(mode) {
-            const templatesBtn = document.getElementById('btnTemplatesTab');
-            const contactsBtn = document.getElementById('btnContactsTab');
-            const templatesArea = document.getElementById('personaTemplatesArea');
-            const contactsArea = document.getElementById('personaContactsArea');
-
-            if (mode === 'templates') {
-                templatesBtn.className = 'btn-save';
-                contactsBtn.className = 'btn-reset';
-                templatesArea.style.display = 'block';
-                contactsArea.style.display = 'none';
-                loadTemplates();
-            } else {
-                templatesBtn.className = 'btn-reset';
-                contactsBtn.className = 'btn-save';
-                templatesArea.style.display = 'none';
-                contactsArea.style.display = 'block';
-                loadContacts();
-            }
-        }
-
-        // 加载模板配置
-        function loadTemplates() {
-            console.log('loadTemplates() 被调用');
-            if (!window.pywebview || !window.pywebview.api) {
-                console.log('pywebview API 还未准备好，等待...');
-                return;
-            }
-
-            console.log('开始调用 get_persona_templates_list API...');
-            window.pywebview.api.get_persona_templates_list().then(result => {
-                console.log('API 返回结果:', result);
-                if (result.status === 'ok') {
-                    personaTemplates = result.templates || {};
-                    console.log('加载的模板:', Object.keys(personaTemplates));
-                    renderTemplatesList();
-                } else {
-                    console.error('加载模板失败:', result.msg);
-                    const container = document.getElementById('templatesList');
-                    container.innerHTML = `<div style="padding: 20px; color: red; text-align: center;">加载失败: ${result.msg}</div>`;
-                }
-            }).catch(error => {
-                console.error('API 调用异常:', error);
-                const container = document.getElementById('templatesList');
-                container.innerHTML = `<div style="padding: 20px; color: red; text-align: center;">API 调用异常: ${error}</div>`;
-            });
-        }
-
-        // 渲染模板列表
-        function renderTemplatesList() {
-            const container = document.getElementById('templatesList');
-
-            if (!personaTemplates || Object.keys(personaTemplates).length === 0) {
-                container.innerHTML = `
-                    <div class="empty-models">
-                        <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/></svg>
-                        <div class="empty-text">还没有配置任何人设模板</div>
-                        <div class="empty-hint">模板可以被多个联系人引用，实现批量配置</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            Object.entries(personaTemplates).forEach(([templateId, template]) => {
-                html += `
-                    <div class="model-item">
-                        <div class="model-icon" style="background: var(--accent-purple);">
-                            ${templateId.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="model-info">
-                            <div class="model-name">${escapeHtml(template.name || templateId)}</div>
-                            <div class="model-provider">${escapeHtml(template.description || '无描述')}</div>
-                        </div>
-                        <div class="model-actions">
-                            <button class="btn-icon-small" onclick="editTemplate('${escapeHtml(templateId)}')" title="编辑">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
-                            <button class="btn-icon-small delete" onclick="deleteTemplate('${escapeHtml(templateId)}')" title="删除">
-                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // 加载联系人配置
-        function loadContacts() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            window.pywebview.api.get_contact_personas().then(result => {
-                if (result.status === 'ok') {
-                    personasList = result.personas || {};
-                    renderContactsList();
-                    updateDefaultPersonaDisplay();
-                } else {
-                    console.error('加载联系人配置失败:', result.msg);
-                }
-            });
-        }
-
-        // 渲染联系人列表
-        function renderContactsList() {
-            const container = document.getElementById('contactsList');
-
-            // 过滤出真正的联系人配置（排除 default 和 templates）
-            const contacts = Object.entries(personasList).filter(([key]) =>
-                key !== 'default' && key !== 'templates'
-            );
-
-            if (contacts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-models">
-                        <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
-                        <div class="empty-text">还没有配置任何联系人</div>
-                        <div class="empty-hint">添加联系人并选择模板或自定义人设</div>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            contacts.forEach(([contactName, contact]) => {
-                const isEnabled = contact.enabled !== false;
-                const usesTemplate = contact.persona_template;
-                const templateId = usesTemplate || null;
-                const template = templateId ? (personaTemplates[templateId] || {}) : {};
-
-                let aliasesText = '';
-                if (contact.aliases) {
-                    const aliasesArr = Array.isArray(contact.aliases) ? contact.aliases : typeof contact.aliases === 'string' ? contact.aliases.split(',').map(s=>s.trim()) : [];
-                    const aliasesStr = aliasesArr.length > 0 ? aliasesArr.join(', ') : contact.aliases;
-                    aliasesText = `<div style="font-size: 11px; color: var(--text-muted); margin-top: 2px; text-overflow: ellipsis; overflow: hidden; white-space: nowrap; max-width: 180px;" title="${escapeHtml(aliasesStr)}">👥 别名: ${escapeHtml(aliasesStr)}</div>`;
-                }
-
-                html += `
-                    <div class="model-item ${!isEnabled ? 'disabled' : ''}">
-                        <div class="model-icon" style="background: ${isEnabled ? 'var(--accent-blue)' : 'var(--text-muted)'};">
-                            ${contactName.charAt(0).toUpperCase()}
-                        </div>
-                        <div class="model-info" style="flex: 1; min-width: 0;">
-                            <div class="model-name">${escapeHtml(contactName)}</div>
-                            <div class="model-provider">
-                                ${usesTemplate ?
-                                    `<span style="color: var(--accent-purple);">📋 ${escapeHtml(template.name || templateId)}</span>` :
-                                    `<span>${escapeHtml(contact.name || '自定义')}</span>`
-                                }
-                            </div>
-                            ${aliasesText}
-                        </div>
-                        <div class="model-actions">
-                            <button class="btn-icon-small" onclick="copyContact('${escapeHtml(contactName)}')" title="复制配置到新联系人">
-                                <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-                            </button>
-                            <button class="btn-icon-small" onclick="editContact('${escapeHtml(contactName)}')" title="编辑">
-                                <svg viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            </button>
-                            <button class="btn-icon-small delete" onclick="deleteContact('${escapeHtml(contactName)}')" title="删除">
-                                <svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-
-            container.innerHTML = html;
-        }
-
-        // 更新默认人设显示
-        function updateDefaultPersonaDisplay() {
-            const defaultPersona = personasList['default'] || {};
-            const descEl = document.getElementById('defaultPersonaDesc');
-            descEl.textContent = defaultPersona.description || '适用于所有未配置特定人设的联系人';
-        }
-
-        // ===== 模板管理功能 =====
-
-        function showAddTemplateForm() {
-            editingTemplateId = null;
-            document.getElementById('templateFormTitle').textContent = '添加新模板';
-            document.getElementById('templateId').value = '';
-            document.getElementById('templateId').disabled = false;
-            document.getElementById('templateName').value = '';
-            document.getElementById('templateDescription').value = '';
-            document.getElementById('templatePrompt').value = '';
-            updateTemplateCharCount();
-
-            document.getElementById('templateForm').style.display = 'block';
-            document.getElementById('templatePlaceholder').style.display = 'none';
-        }
-
-        function editTemplate(templateId) {
-            const template = personaTemplates[templateId];
-            if (!template) return;
-
-            editingTemplateId = templateId;
-            document.getElementById('templateFormTitle').textContent = '编辑模板';
-            document.getElementById('templateId').value = templateId;
-            document.getElementById('templateId').disabled = true;
-            document.getElementById('templateName').value = template.name || '';
-            document.getElementById('templateDescription').value = template.description || '';
-            document.getElementById('templatePrompt').value = template.system_prompt || '';
-            updateTemplateCharCount();
-
-            document.getElementById('templateForm').style.display = 'block';
-            document.getElementById('templatePlaceholder').style.display = 'none';
-        }
-
-        function hideTemplateForm() {
-            document.getElementById('templateForm').style.display = 'none';
-            document.getElementById('templatePlaceholder').style.display = 'flex';
-            editingTemplateId = null;
-        }
-
-        function saveTemplate() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            const templateId = document.getElementById('templateId').value.trim();
-            const templateData = {
-                name: document.getElementById('templateName').value.trim(),
-                description: document.getElementById('templateDescription').value.trim(),
-                system_prompt: document.getElementById('templatePrompt').value.trim()
-            };
-
-            if (!templateId) {
-                showCustomAlert('请输入模板ID');
-                return;
-            }
-
-            if (!templateData.name) {
-                showCustomAlert('请输入模板名称');
-                return;
-            }
-
-            if (!templateData.system_prompt) {
-                showCustomAlert('请输入 System Prompt');
-                return;
-            }
-
-            if (editingTemplateId) {
-                // 更新模板
-                window.pywebview.api.update_persona_template(templateId, templateData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('模板更新成功');
-                        hideTemplateForm();
-                        loadTemplates(); // 重新加载
-                    } else {
-                        showCustomAlert('更新失败: ' + result.msg);
-                    }
-                });
-            } else {
-                // 添加新模板
-                window.pywebview.api.add_persona_template(templateId, templateData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('模板添加成功');
-                        hideTemplateForm();
-                        loadTemplates(); // 重新加载
-                    } else {
-                        showCustomAlert('添加失败: ' + result.msg);
-                    }
-                });
-            }
-        }
-
-        function deleteTemplate(templateId) {
-            showConfirmDialog(`确定要删除模板 '${templateId}' 吗？使用该模板的联系人将自动切换到默认人设。`, () => {
-                window.pywebview.api.delete_persona_template(templateId).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('模板已删除');
-                        loadTemplates();
-                        loadContacts(); // 更新联系人显示
-                    } else {
-                        showCustomAlert('删除失败: ' + result.msg);
-                    }
-                });
-            });
-        }
-
-        function updateTemplateCharCount() {
-            const prompt = document.getElementById('templatePrompt').value;
-            const count = prompt.length;
-            const countEl = document.getElementById('templateCharCount');
-            countEl.textContent = `${count} / 5000 字符`;
-
-            if (count > 5000) {
-                countEl.style.color = 'var(--accent-red)';
-            } else if (count > 4000) {
-                countEl.style.color = 'var(--accent-orange)';
-            } else {
-                countEl.style.color = 'var(--text-muted)';
-            }
-        }
-
-        // ===== 联系人配置功能 =====
-
-        function showAddContactForm() {
-            editingContactName = null;
-            document.getElementById('contactFormTitle').textContent = '添加新联系人';
-            document.getElementById('contactName').value = '';
-            document.getElementById('contactName').disabled = false;
-            document.getElementById('contactAliases').value = '';
-            document.querySelector('input[name="personaMode"][value="template"]').checked = true;
-            onContactModeChange();
-
-            document.getElementById('contactForm').style.display = 'block';
-            document.getElementById('contactPlaceholder').style.display = 'none';
-        }
-
-        function editContact(contactName) {
-            const contact = personasList[contactName];
-            if (!contact) return;
-
-            editingContactName = contactName;
-            document.getElementById('contactFormTitle').textContent = '编辑联系人';
-            document.getElementById('contactName').value = contactName;
-            document.getElementById('contactName').disabled = true;
-
-            let aliases = contact.aliases || '';
-            if (Array.isArray(aliases)) {
-                aliases = aliases.join(', ');
-            }
-            document.getElementById('contactAliases').value = aliases;
-
-            // 根据配置方式设置界面
-            const usesTemplate = 'persona_template' in contact;
-            if (usesTemplate) {
-                document.querySelector('input[name="personaMode"][value="template"]').checked = true;
-                document.getElementById('contactTemplateSelect').value = contact.persona_template || '';
-                onContactTemplateChange();
-            } else {
-                document.querySelector('input[name="personaMode"][value="custom"]').checked = true;
-                document.getElementById('contactPersonaName').value = contact.name || '';
-                document.getElementById('contactDescription').value = contact.description || '';
-                document.getElementById('contactPrompt').value = contact.system_prompt || '';
-                updateContactCharCount();
-            }
-
-            document.querySelector(`input[name="contactEnabled"][value="${contact.enabled !== false ? 'true' : 'false'}"]`).checked = true;
-
-            document.getElementById('contactForm').style.display = 'block';
-            document.getElementById('contactPlaceholder').style.display = 'none';
-        }
-
-        function hideContactForm() {
-            document.getElementById('contactForm').style.display = 'none';
-            document.getElementById('contactPlaceholder').style.display = 'flex';
-            editingContactName = null;
-        }
-
-        function onContactModeChange() {
-            const mode = document.querySelector('input[name="personaMode"]:checked').value;
-            const templateMode = document.getElementById('contactTemplateMode');
-            const customMode = document.getElementById('contactCustomMode');
-
-            if (mode === 'template') {
-                templateMode.style.display = 'block';
-                customMode.style.display = 'none';
-                // 加载模板选项
-                loadTemplateOptions();
-            } else {
-                templateMode.style.display = 'none';
-                customMode.style.display = 'block';
-            }
-        }
-
-        function loadTemplateOptions() {
-            const select = document.getElementById('contactTemplateSelect');
-            select.innerHTML = '<option value="">-- 请选择模板 --</option>';
-
-            Object.entries(personaTemplates).forEach(([templateId, template]) => {
-                const option = document.createElement('option');
-                option.value = templateId;
-                option.textContent = `${template.name || templateId} - ${template.description || '无描述'}`;
-                select.appendChild(option);
-            });
-        }
-
-        function onContactTemplateChange() {
-            const templateId = document.getElementById('contactTemplateSelect').value;
-            const descEl = document.getElementById('selectedTemplateDesc');
-
-            if (templateId && personaTemplates[templateId]) {
-                const template = personaTemplates[templateId];
-                descEl.textContent = template.description || '选择一个模板后，该联系人将使用模板的人设配置';
-            } else {
-                descEl.textContent = '选择一个模板后，该联系人将使用模板的人设配置';
-            }
-        }
-
-        function saveContact() {
-            if (!window.pywebview || !window.pywebview.api) return;
-
-            const contactName = document.getElementById('contactName').value.trim();
-            const contactAliases = document.getElementById('contactAliases').value.trim();
-            const mode = document.querySelector('input[name="personaMode"]:checked').value;
-            const isEnabled = document.querySelector('input[name="contactEnabled"]:checked').value === 'true';
-
-            let contactData = {
-                enabled: isEnabled
-            };
-
-            if (contactAliases) {
-                // 将逗号分隔的字符串存入
-                contactData.aliases = contactAliases.split(',').map(s => s.trim()).filter(s => s);
-            } else {
-                // 如果为空，明确清空 aliases 字段
-                contactData.aliases = [];
-            }
-
-            if (mode === 'template') {
-                // 引用模板模式：name字段使用联系人名称
-                contactData.name = contactName;
-                const templateId = document.getElementById('contactTemplateSelect').value;
-                if (!templateId) {
-                    showCustomAlert('请选择一个模板');
-                    return;
-                }
-                contactData.persona_template = templateId;
-            } else {
-                // 自定义人设模式：name字段使用人设名称
-                const personaName = document.getElementById('contactPersonaName').value.trim();
-                if (!personaName) {
-                    showCustomAlert('请输入人设名称');
-                    return;
-                }
-                contactData.name = personaName;
-                contactData.description = document.getElementById('contactDescription').value.trim();
-                contactData.system_prompt = document.getElementById('contactPrompt').value.trim();
-            }
-
-            // 验证
-            if (!contactName) {
-                showCustomAlert('请输入联系人名称');
-                return;
-            }
-
-            if (mode === 'custom' && !contactData.system_prompt) {
-                showCustomAlert('请输入 System Prompt');
-                return;
-            }
-
-            // 调用后端 API
-            if (editingContactName) {
-                // 编辑模式：使用原始联系人名称作为key
-                window.pywebview.api.update_contact_persona(editingContactName, contactData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('联系人配置更新成功');
-                        hideContactForm();
-                        loadContacts(); // 重新加载
-                    } else {
-                        showCustomAlert('更新失败: ' + result.msg);
-                    }
-                });
-            } else {
-                // 添加模式：使用新的联系人名称作为key
-                window.pywebview.api.add_contact_persona(contactName, contactData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('联系人配置添加成功');
-                        hideContactForm();
-                        loadContacts(); // 重新加载
-                    } else {
-                        showCustomAlert('添加失败: ' + result.msg);
-                    }
-                });
-            }
-        }
-
-        function deleteContact(contactName) {
-            showConfirmDialog(`确定要删除联系人 '${contactName}' 的配置吗？`, () => {
-                window.pywebview.api.delete_contact_persona(contactName).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert('联系人配置已删除');
-                        loadContacts();
-                    } else {
-                        showCustomAlert('删除失败: ' + result.msg);
-                    }
-                });
-            });
-        }
-
-        function copyContact(sourceContactName) {
-            // 使用自定义弹窗输入新联系人名称
-            const modal = document.getElementById('customModal');
-            const modalMessage = document.getElementById('modalMessage');
-            const modalButtons = document.querySelector('.modal-buttons');
-
-            modalMessage.innerHTML = `<div style="margin-bottom:12px;">请输入新联系人名称，将复制 '${escapeHtml(sourceContactName)}' 的配置：</div><input type="text" id="copyContactInput" class="form-input" placeholder="新联系人名称" style="margin-bottom:0;">`;
-            modalButtons.innerHTML = '';
-
-            const cancelBtn = document.createElement('button');
-            cancelBtn.className = 'modal-btn secondary';
-            cancelBtn.textContent = '取消';
-            cancelBtn.onclick = () => {
-                modal.classList.remove('active');
-                setTimeout(() => {
-                    modalButtons.innerHTML = '<button class="modal-btn primary" onclick="closeModal()">确定</button>';
-                }, 200);
-            };
-
-            const confirmBtn = document.createElement('button');
-            confirmBtn.className = 'modal-btn primary';
-            confirmBtn.textContent = '确认复制';
-            confirmBtn.onclick = () => {
-                const newName = document.getElementById('copyContactInput').value.trim();
-                modal.classList.remove('active');
-                setTimeout(() => {
-                    modalButtons.innerHTML = '<button class="modal-btn primary" onclick="closeModal()">确定</button>';
-                }, 200);
-
-                if (!newName) return;
-                if (newName === sourceContactName) {
-                    showCustomAlert('新联系人名称不能与源联系人相同');
-                    return;
-                }
-                const sourceContact = personasList[sourceContactName];
-                if (!sourceContact) {
-                    showCustomAlert('源联系人配置不存在');
-                    return;
-                }
-                const newContactData = JSON.parse(JSON.stringify(sourceContact));
-                window.pywebview.api.add_contact_persona(newName, newContactData).then(result => {
-                    if (result.status === 'ok') {
-                        showCustomAlert(`已将 '${sourceContactName}' 的配置复制到 '${newName}'`);
-                        loadContacts();
-                    } else {
-                        showCustomAlert('复制失败: ' + result.msg);
-                    }
-                });
-            };
-
-            modalButtons.appendChild(cancelBtn);
-            modalButtons.appendChild(confirmBtn);
-            modal.classList.add('active');
-
-            // 延迟聚焦到输入框
-            setTimeout(() => { const inp = document.getElementById('copyContactInput'); if(inp) inp.focus(); }, 100);
-        }
-
-        function updateContactCharCount() {
-            const prompt = document.getElementById('contactPrompt').value;
-            const count = prompt.length;
-            const countEl = document.getElementById('contactCharCount');
-            countEl.textContent = `${count} / 5000 字符`;
-
-            if (count > 5000) {
-                countEl.style.color = 'var(--accent-red)';
-            } else if (count > 4000) {
-                countEl.style.color = 'var(--accent-orange)';
-            } else {
-                countEl.style.color = 'var(--text-muted)';
-            }
-        }
-
-        // 默认人设编辑
-        function showDefaultPersonaForm() {
-            const defaultPersona = personasList['default'] || {};
-
-            editingContactName = 'default';
-            document.getElementById('contactFormTitle').textContent = '编辑默认人设';
-            document.getElementById('contactName').value = 'default';
-            document.getElementById('contactName').disabled = true;
-            document.querySelector('input[name="personaMode"][value="custom"]').checked = true;
-            onContactModeChange();
-
-            document.getElementById('contactPersonaName').value = defaultPersona.name || '默认人设';
-            document.getElementById('contactDescription').value = defaultPersona.description || '';
-            document.getElementById('contactPrompt').value = defaultPersona.system_prompt || '';
-            updateContactCharCount();
-
-            document.getElementById('contactForm').style.display = 'block';
-            document.getElementById('contactPlaceholder').style.display = 'none';
-        }
-
-        // 监听输入变化
-        document.addEventListener('DOMContentLoaded', function() {
-            const templatePrompt = document.getElementById('templatePrompt');
-            const contactPrompt = document.getElementById('contactPrompt');
-            if (templatePrompt) {
-                templatePrompt.addEventListener('input', updateTemplateCharCount);
-            }
-            if (contactPrompt) {
-                contactPrompt.addEventListener('input', updateContactCharCount);
-            }
-        });
-    </script>
+    <!-- 模型选择弹窗 -->
+    <div id="modelSelectorModal" class="custom-modal">
+        <div class="modal-content" style="max-width: 450px;">
+            <div class="modal-title">切换 AI 模型</div>
+            <div class="modal-message" style="max-height: 400px; overflow-y: auto;">
+                <div id="modelSelectorList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- 模型列表将动态生成 -->
+                </div>
+            </div>
+            <div class="modal-buttons">
+                <button class="modal-btn secondary" onclick="closeModelSelector()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 底部 Tab -->
+    <div class="tab-nav">
+        <div class="tab-item active" onclick="switchTab('panel-monitor', this)">
+            <svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>监控</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('panel-settings', this)">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+            <span>配置</span>
+        </div>
+        <div class="tab-item" onclick="switchTab('panel-persona', this)">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+            <span>人设</span>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
 </body>
 </html>
