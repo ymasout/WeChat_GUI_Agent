@@ -25,6 +25,7 @@ ENV/
 .env
 data/config.yaml
 data/reply_hash_cache.json
+data/memory.db
 
 # ---------- IDE / 编辑器 ----------
 .vscode/

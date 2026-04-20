@@ -17,12 +17,14 @@
 │   ├── vision.py            # 视觉截屏与 HSV 未读检测（线程安全 mss + 交互式校准）
 │   ├── ocr_parser.py        # PaddleOCR 识别与消息解析（归属判断、去重、digest 模式）
 │   ├── agent.py             # LLM 大脑模块（DeepSeek/OpenAI 兼容，.env 优先读取）
-│   ├── action.py            # 执行层模块（拟人化输出、剪贴板注入、双击）
+│   ├── action.py            # 执行层模块（拟人流式输出、剪贴板注入、双击）
+│   ├── memory_manager.py    # P2 记忆管理模块（SQLite 存储、上下文检索）
 │   └── anti_risk.py         # 防风控与伪装模块
 ├── data/                    # 数据与持久化配置
 │   ├── config.yaml          # 🔒 个人坐标/参数配置，已被 .gitignore 屏蔽
 │   ├── config.example.yaml  # 配置模板文件（供新用户参考）
 │   ├── reply_hash_cache.json # 🔒 P1 防鞭尸缓存（自动生成），已被 .gitignore 屏蔽
+│   ├── memory.db            # 🔒 P2 记忆数据库（自动生成），已被 .gitignore 屏蔽
 │   ├── contacts.yaml        # [规划中] 联系人分组与人设绑定
 │   └── knowledge/           # [规划中] RAG 本地知识库
 ├── ui/                      # 图形控制台界面
@@ -67,7 +69,7 @@ flowchart TD
     K -->|空包弹或全是自己的| L
     
     K -->|有对方的新消息| M["投喂 DeepSeek"]
-    M --> N["Ctrl+V 粘贴回复 Enter发送"]
+    M --> N["拟人流式输出回复 Enter发送"]
     N --> O["冷却3秒"]
     O --> P["全量截图 标记屏幕上所有内容为已读"]
     P --> Q["重置蹲守计时器"]
@@ -167,9 +169,10 @@ flowchart TD
 │ 3. LLM 生成回复前                        │
 │    └─ 检查鼠标 → 有干预则等待            │
 ├─────────────────────────────────────────┤
-│ 4. 粘贴回复内容（Ctrl+V）                │
+│ 4. 拟人流式输出回复（逐字粘贴）            │
 │    ├─ 鼠标检查 → 有干预则等待            │
-│    └─ 焦点验证 → 失焦则中断              │
+│    ├─ 焦点验证 → 失焦则中断              │
+│    └─ 每字粘贴前防线轮询                 │
 ├─────────────────────────────────────────┤
 │ 5. 发送消息（Enter）                      │
 │    ├─ 鼠标检查 → 有干预则等待            │
@@ -413,6 +416,251 @@ if not response.choices[0].message.content:
 | 大模型被套取密码 | 正则黑名单拦截 | LLM 输出后 | 替换安全话术 | V1.2 |
 | 系统提示被当作消息 | 关键词过滤 | OCR 解析时 | 自动过滤，不处理 | V1.2 |
 | API 调用返回空值 | 响应结构验证 | API 调用后 | 详细错误日志 | V1.2 |
+
+---
+
+## P2 阶段：记忆流与上下文摘要引擎 (V1.3)
+
+> **设计理念**：为 AI 助手赋予长期记忆能力，实现跨会话的上下文连贯性，让 AI 能够记住与每个联系人的对话历史，提供更智能、更有温度的回复体验。
+
+### 架构设计
+
+```text
+┌─────────────────────────────────────────────────────────┐
+│  P2 记忆管理层 (Memory Manager)                          │
+│  ├─ SQLite 本地数据库 (data/memory.db)                  │
+│  ├─ 按联系人维度存储历史记录                             │
+│  ├─ Base64 内容混淆保护隐私                             │
+│  └─ 滑动窗口自动清理 (每联系人 100 条)                  │
+└─────────────────────────────────────────────────────────┘
+                         ↓
+┌─────────────────────────────────────────────────────────┐
+│  Agent 大脑层集成                                         │
+│  ├─ 初始化时实例化 MemoryManager                         │
+│  ├─ 调用 LLM 前获取历史上下文                            │
+│  ├─ LLM 返回后保存对话记录                               │
+│  └─ 降级模式：记忆失败时继续运行                         │
+└─────────────────────────────────────────────────────────┘
+```
+
+### 数据库表结构
+
+**messages 表设计：**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| `id` | INTEGER | 主键，自增 |
+| `contact_name` | TEXT | 联系人名字（微信备注名） |
+| `role` | TEXT | 角色（user/assistant） |
+| `content` | TEXT | 消息内容（Base64 混淆） |
+| `timestamp` | DATETIME | 时间戳 |
+| `created_at` | INTEGER | Unix 时间戳（排序用） |
+
+**索引优化：**
+```sql
+CREATE INDEX idx_contact_timestamp
+ON messages (contact_name, created_at DESC);
+```
+
+### 核心功能模块
+
+#### 1. MemoryManager 类
+
+**文件**：`core/memory_manager.py`
+
+| 方法 | 功能 | 参数 | 返回值 |
+|------|------|------|--------|
+| `__init__()` | 初始化记忆管理器 | `db_path`, `enable_encryption` | MemoryManager 实例 |
+| `add_message()` | 添加新记录 | `contact_name`, `role`, `content` | `bool` 成功标志 |
+| `get_context()` | 获取历史上下文 | `contact_name`, `limit=20` | `List[Dict]` 消息列表 |
+| `get_stats()` | 获取统计信息 | - | `Dict` 统计数据 |
+| `clear_contact_memory()` | 清空联系人记录 | `contact_name` | `bool` 成功标志 |
+| `export_memory()` | 导出为 JSON | `contact_name` (可选) | `str` JSON 字符串 |
+
+#### 2. 数据隐私保护
+
+**Base64 混淆机制：**
+```python
+# 加密存储
+encrypted_content = base64.b64encode(content.encode('utf-8'))
+
+# 解密读取
+decrypted_content = base64.b64decode(encrypted_bytes).decode('utf-8')
+```
+
+**保护策略：**
+- ✅ 本地数据库内容混淆，防止明文泄露
+- ✅ 可配置开关 `enable_encryption`
+- ✅ 支持导出加密数据进行备份
+
+#### 3. 滑动窗口机制
+
+**自动清理策略：**
+- 每个联系人最多保留 100 条记录
+- 超过限制时自动删除最旧的记录
+- 按 `created_at` 时间戳排序清理
+
+**清理触发时机：**
+```python
+# 每次添加新记录后检查
+if count > self.max_records_per_contact:
+    delete_count = count - self.max_records_per_contact
+    # 删除最旧的记录
+```
+
+### Agent 大脑层集成
+
+#### 1. 初始化集成
+
+**文件**：`core/agent.py`
+
+```python
+def __init__(self, config_path="data/config.yaml"):
+    # ... 原有初始化代码 ...
+
+    # P2 阶段新增：记忆管理器
+    try:
+        db_path = self.config.get("memory", {}).get("db_path", "data/memory.db")
+        enable_encryption = self.config.get("memory", {}).get("enable_encryption", True)
+        self.memory = MemoryManager(db_path=db_path, enable_encryption=enable_encryption)
+        logging.info("🧠 大脑：记忆管理器已就绪")
+    except Exception as e:
+        logging.error(f"❌ 大脑：记忆管理器初始化失败 - {e}")
+        self.memory = None  # 降级模式
+```
+
+#### 2. 上下文加载流程
+
+```mermaid
+graph TD
+    A[think_and_reply 被调用] --> B{记忆管理器可用?}
+    B -->|是| C[获取历史上下文 get_context]
+    B -->|否| D[跳过历史加载]
+    C --> E[组装完整消息列表]
+    D --> E
+    E --> F[调用 LLM 生成回复]
+    F --> G[风控检查]
+    G --> H[保存对话记录 add_message]
+    H --> I[返回最终回复]
+```
+
+#### 3. 安全风控集成
+
+**保存策略说明：**
+- ✅ **保存过滤后的安全回答**
+- 📋 理由：
+  1. 数据库主要用于提供上下文，保存安全话术能保持一致性
+  2. 避免高风险内容在后续对话中继续引发问题
+  3. 符合实际发送给用户的真实交互
+  4. 原始回答已记录在日志中供安全审计
+
+```python
+# P1 风控检查
+is_safe, processed_text, warning_msg = self._check_safety_guardrail(reply_text)
+
+# P2 保存过滤后的安全回答
+if self.memory and contact_name:
+    self.memory.add_message(contact_name, "assistant", processed_text)
+```
+
+### 配置文件扩展
+
+**config.yaml 新增配置：**
+
+```yaml
+# 记忆管理配置 (P2 阶段)
+memory:
+  db_path: "data/memory.db"        # 数据库路径
+  enable_encryption: true           # 启用内容混淆
+  max_records_per_contact: 100      # 每联系人最大记录数
+  context_limit: 20                 # 默认上下文条数
+```
+
+### 使用场景与效果
+
+| 场景 | 无记忆 (V1.1) | 有记忆 (V1.3) |
+|------|---------------|---------------|
+| **连续对话** | 每次重新开始，无上下文 | 记住前文，逻辑连贯 |
+| **联系人专属** | 依赖人设配置 | 自动学习个人对话风格 |
+| **长期关系** | 无法建立对话历史 | 维持长期对话关系 |
+| **引用历史** | 无法引用之前的内容 | 可以引用之前的对话 |
+
+### 性能优化
+
+| 优化项 | 实现方式 | 效果 |
+|--------|----------|------|
+| **数据库索引** | `idx_contact_timestamp` | 加速查询 10-100 倍 |
+| **连接管理** | `with` 语句自动释放 | 避免连接泄漏 |
+| **滑动窗口** | 自动清理旧记录 | 控制数据库大小 |
+| **降级模式** | 初始化失败继续运行 | 不影响主功能 |
+
+### 数据安全与隐私
+
+| 安全措施 | 实现方式 | 保护对象 |
+|----------|----------|----------|
+| **内容混淆** | Base64 编码 | 防止明文泄露 |
+| **本地存储** | SQLite 文件 | 数据不外传 |
+| **导出控制** | JSON 格式导出 | 便于备份管理 |
+| **清理功能** | `clear_contact_memory` | 支持手动清理 |
+
+### 异常处理机制
+
+```python
+# 记忆管理器初始化失败 → 降级模式
+try:
+    self.memory = MemoryManager(...)
+except Exception as e:
+    self.memory = None  # 继续运行，无记忆功能
+
+# 历史加载失败 → 跳过历史，继续对话
+try:
+    history_context = self.memory.get_context(contact_name)
+except Exception as e:
+    logging.warning(f"加载历史记忆失败，继续无记忆模式 - {e}")
+
+# 记录保存失败 → 仅记录警告，不影响回复
+try:
+    self.memory.add_message(...)
+except Exception as e:
+    logging.warning(f"保存对话记录失败 - {e}")
+```
+
+### 测试与验证
+
+**内置测试命令：**
+```bash
+python core/memory_manager.py
+```
+
+**测试覆盖：**
+- ✅ 添加消息功能
+- ✅ 获取上下文功能
+- ✅ 统计信息查询
+- ✅ 导出功能
+- ✅ 滑动窗口机制
+- ✅ 加密/解密功能
+
+### 依赖更新
+
+**requirements.txt 无需新增依赖：**
+- SQLite3 为 Python 内置模块
+- Base64 为 Python 标准库
+- 无额外第三方依赖
+
+### 版本兼容性
+
+| 版本 | 新增功能 | 兼容性 |
+|------|----------|--------|
+| **V1.3** | 记忆管理功能 | 完全兼容 V1.2 |
+| **V1.2** | 安全防线 | 保持不变 |
+| **V1.1** | 联系人人设 | 保持不变 |
+
+### 未来扩展方向
+
+- [ ] 支持语义搜索，智能检索相关历史
+- [ ] 实现对话摘要，压缩长对话上下文
+- [ ] 支持向量数据库，提升检索效率
+- [ ] 跨设备同步，云端备份记忆数据
 
 ---
 

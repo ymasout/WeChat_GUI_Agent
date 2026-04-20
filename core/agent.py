@@ -3,6 +3,7 @@ import yaml
 import logging
 import re
 from openai import OpenAI
+from .memory_manager import MemoryManager
 
 # 自动加载 .env 文件到环境变量（如果安装了 python-dotenv）
 try:
@@ -26,6 +27,16 @@ class AgentBrain:
 
         # P1 阶段新增：输出风控护栏 - 高危词汇黑名单
         self.danger_keywords = self._init_danger_keywords()
+
+        # P2 阶段新增：记忆管理器 - 存储和检索聊天历史
+        try:
+            db_path = self.config.get("memory", {}).get("db_path", "data/memory.db")
+            enable_encryption = self.config.get("memory", {}).get("enable_encryption", True)
+            self.memory = MemoryManager(db_path=db_path, enable_encryption=enable_encryption)
+            logging.info("🧠 大脑：记忆管理器已就绪")
+        except Exception as e:
+            logging.error(f"❌ 大脑：记忆管理器初始化失败 - {e}")
+            self.memory = None  # 降级模式：无记忆功能
 
         # 支持新的多模型配置系统
         models = self.config.get("models", [])
@@ -250,19 +261,33 @@ class AgentBrain:
         # 根据联系人选择对应的 system_prompt (V1.1 新增)
         persona = self._get_persona_for_contact(contact_name)
         messages_prompt = [{"role": "system", "content": persona}]
-        
+
+        # P2 阶段新增：从记忆库中获取历史上下文
+        if self.memory and contact_name:
+            try:
+                # 获取最近的历史记录（默认 20 条）
+                history_context = self.memory.get_context(contact_name, limit=20)
+                if history_context:
+                    messages_prompt.extend(history_context)
+                    logging.debug(f"🧠 大脑：从记忆库加载了 {len(history_context)} 条历史记录")
+            except Exception as e:
+                logging.warning(f"⚠️ 大脑：加载历史记忆失败，继续无记忆模式 - {e}")
+
         has_new_them_msg = False
-        
+        new_user_messages = []  # 存储对方的新消息，用于后续保存到记忆库
+
         for msg in new_messages_context:
             role = "user" if msg["sender"] == "them" else "assistant"
             if role == "user":
                 has_new_them_msg = True
-                
+                # 记录对方的新消息内容
+                new_user_messages.append(msg["text"])
+
             content = msg["text"]
             if msg.get("is_multimodal"):
                 # 如果这个包是张贴图，我们要在传给大模型的话底下打个小报告强行降级它
                 content = f"[{content}] (系统上帝视角提示：对方发来了一条包含你不支持的媒体格式消息，你要找借口告诉他你现在的这台设备处理不了)"
-                
+
             messages_prompt.append({"role": role, "content": content})
 
         # 核心防卡死机制：如果这段历史里根本没有对方 ('them') 发来的新消息（全是历史的自己的留言等）
@@ -270,14 +295,14 @@ class AgentBrain:
         if not has_new_them_msg:
             logging.info("大脑：队列里没有需要回复对方的增量话语，进入假死待机...")
             return ""
-            
+
         try:
             logging.info(f"大脑：正在向远端云节点 ({self.model}) 发送 {len(messages_prompt)} 条记忆碎片进行思考演算...")
             response = self.client.chat.completions.create(
                 model=self.model,
                 messages=messages_prompt,
                 temperature=0.7, # 根据大模型厂商的最佳聊天口语化体验值，不能太严谨
-                max_tokens=150
+                max_tokens=1024
             )
 
             # 安全检查：确保响应结构和内容都存在
@@ -303,6 +328,24 @@ class AgentBrain:
                 logging.warning(f"⚠️ 安全防线：风控已拦截，返回安全话术")
                 # 可以在这里选择是否记录到专门的告警日志文件
                 # 或者触发通知（如发送邮件/推送给管理员）
+
+            # P2 阶段新增：将对话记录保存到记忆库
+            # 选择保存过滤后的安全回答，理由：
+            # 1. 数据库中的记录主要用于提供上下文，保存安全话术能保持上下文一致性
+            # 2. 如果保存高风险内容，可能会在后续对话中继续引发问题
+            # 3. 实际发送给用户的是安全话术，保存安全话术符合真实交互
+            # 4. 原始回答已记录在日志中，可用于安全审计
+            if self.memory and contact_name:
+                try:
+                    # 保存对方的新消息
+                    for user_msg in new_user_messages:
+                        self.memory.add_message(contact_name, "user", user_msg)
+
+                    # 保存 AI 的回答（保存过滤后的安全话术）
+                    self.memory.add_message(contact_name, "assistant", processed_text)
+                    logging.debug("💾 大脑：对话记录已保存到记忆库")
+                except Exception as e:
+                    logging.warning(f"⚠️ 大脑：保存对话记录到记忆库失败 - {e}")
 
             return processed_text
 

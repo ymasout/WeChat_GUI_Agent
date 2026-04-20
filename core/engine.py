@@ -39,6 +39,7 @@ class WeChatEngine:
         self.brain = AgentBrain(config_path=self.config_path)
         self.action = ActionExecutor()
         self.is_running = False
+        self.action.set_running_checker(lambda: self.is_running)
 
         # P1 阶段新增：防鞭尸机制 - 存储每个联系人的最后回复消息哈希
         self.last_replied_hash = {}  # 格式: {contact_name: hash_value}

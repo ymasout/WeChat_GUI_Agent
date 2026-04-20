@@ -1,4 +1,5 @@
 import time
+import random
 import logging
 from pynput.keyboard import Controller as KeyboardController, Key
 from pynput.mouse import Controller as MouseController, Button
@@ -31,6 +32,11 @@ class ActionExecutor:
         self.last_mouse_position = None  # 上一次鼠标位置（用于检测用户抢夺）
         self.mouse_jump_threshold = 50  # 降低阈值：50px 足以检测真实用户干预（原100px）
         self._handle_initialized = False  # 标记窗口句柄是否已初始化（延迟初始化）
+        self.is_running_checker = None
+
+    def set_running_checker(self, checker_func):
+        """设定引擎中断状态校验函数"""
+        self.is_running_checker = checker_func
 
         # 不在初始化时获取窗口句柄，改为首次使用时获取
         # 这样可以避免启动时的潜在问题
@@ -141,6 +147,9 @@ class ActionExecutor:
         try:
             wait_round = 0
             while True:
+                if self.is_running_checker and not self.is_running_checker():
+                    raise RuntimeError("EngineStopped")
+
                 wait_round += 1
 
                 # 记录当前位置
@@ -177,7 +186,100 @@ class ActionExecutor:
             self.last_mouse_position = self.mouse.position
         except Exception as e:
             logging.debug(f"记录鼠标位置失败: {e}")
-        
+
+    def _stream_type_text(self, text: str) -> bool:
+        """
+        拟人流式输出：将文本逐字粘贴到输入框，模拟人类打字行为
+        包含防线校验、随机延迟和偶发手误模拟
+
+        :param text: 要输出的文本
+        :return: True 表示输出成功，False 表示中断（安全防线触发或出错）
+        """
+        if not text:
+            return True
+
+        logging.info(f"⌨️ 拟人流式输出：开始逐字粘贴，总字数 {len(text)}...")
+
+        # 常见汉字列表，用于手误模拟
+        common_chars = "的一是在不了有和人这中大为上个国我以要他时来用们生到作地于出就分对成会可主发年动同工也能下过子说产种面而方后多定行学法所民得经十三之进着等部度家电力里如水化高自二理起小物现实量都两体制机当使点从业本去把性好应开它合还因由其些然前外天政四日那社义事平形相全表间样与关各重新线内数正心反你明看原又么利比或但质气第向道命此变条只没结解问意建月公无系军很情者最立代想已通并提直题党程展五果料象员革位入常文总次品式活设及管特件长求老头基资边流路级少图山统接知较将组见计别她手角期根论运农指几九区强放决西被干做必战先回则任取据处队南给色光门即保治北造百规热领七海口东导器压志世金增争济阶油思术极交受联什认六共权收证改清己美再采转更单风切打白教速花带安场身车例真务具万每目至达走积示议声报斗完类八离华名确才科张信马节话米整空元况今集温传土许步群广石记需段研界拉林律叫且究观越织装影算低持音众书布复容儿须际商非验连断深难近矿千周委素技备半办青省列习响约支般史感劳便团往酸历市克何除消构府称太准精值号率族维划选标写存候毛亲快效斯院查江型眼王按格养易置派层片始却专状育厂京识适属圆包火住调满县局照参红细引听该铁价严首底液官德随病苏失尔死讲配女黄推显谈罪神艺呢席含企望密批营项防举球英氧势告李台落木帮轮杀亚迫职促氧消词"
+
+        try:
+            for i, char in enumerate(text):
+                if self.is_running_checker and not self.is_running_checker():
+                    logging.warning("🔴 拦截：引掣已停止，强制切断流式输出。")
+                    return False
+
+                # 安全防线轮询：检查鼠标抢夺
+                if self._check_mouse_hijack():
+                    logging.warning("🚨 安全防线：流式输出中检测到用户干预，等待用户操作完成...")
+                    try:
+                        self._wait_for_user_idle(check_interval=1.0, retry_interval=5.0)
+                        logging.info("✅ 安全防线：用户操作已完成，继续流式输出...")
+                        # 重新记录鼠标位置作为新基准
+                        self._record_mouse_position()
+                    except KeyboardInterrupt:
+                        logging.warning("⚠️ 用户中断流式输出操作")
+                        return False
+                    except RuntimeError as e:
+                        if str(e) == "EngineStopped": return False
+                        logging.warning(f"⚠️ 安全防线：等待用户空闲失败，继续执行 - {e}")
+                    except Exception as e:
+                        logging.warning(f"⚠️ 安全防线：检查失败，继续执行 - {e}")
+
+                # 安全防线轮询：验证焦点窗口
+                if not self._verify_foreground_window():
+                    logging.error("🚨 安全防线：流式输出中焦点已丢失，中断操作！")
+                    return False
+
+                # 手误模拟：2% 的概率触发
+                if random.random() < 0.02:
+                    # 随机选择一个常见汉字作为错别字
+                    typo_char = random.choice(common_chars)
+                    try:
+                        pyperclip.copy(typo_char)
+                        with self.keyboard.pressed(Key.ctrl):
+                            self.keyboard.press('v')
+                            self.keyboard.release('v')
+                        logging.debug(f"🎭 手误模拟：粘贴了错别字 '{typo_char}'")
+                        time.sleep(0.5)  # 停顿 0.5 秒模拟发现错误
+
+                        # 模拟按下 Backspace 键删除错别字
+                        self.keyboard.press(Key.backspace)
+                        self.keyboard.release(Key.backspace)
+                        logging.debug(f"🎭 手误模拟：已删除错别字")
+                        time.sleep(0.3)  # 停顿后继续
+                    except Exception as e:
+                        logging.warning(f"⚠️ 手误模拟失败，继续正常输出 - {e}")
+
+                # 正常粘贴当前字符
+                try:
+                    pyperclip.copy(char)
+                    with self.keyboard.pressed(Key.ctrl):
+                        self.keyboard.press('v')
+                        self.keyboard.release('v')
+
+                    # 物理拟人：随机停顿 0.08-0.25 秒
+                    delay = random.uniform(0.08, 0.25)
+                    time.sleep(delay)
+
+                    # 每 20 个字符输出一次进度
+                    if (i + 1) % 20 == 0:
+                        logging.info(f"⌨️ 拟人流式输出：已输出 {i + 1}/{len(text)} 个字符...")
+
+                except Exception as e:
+                    logging.error(f"❌ 流式输出失败，在第 {i + 1} 个字符处出错: {e}")
+                    return False
+
+            logging.info(f"✅ 拟人流式输出：完成全部 {len(text)} 个字符的输出")
+            return True
+
+        except KeyboardInterrupt:
+            logging.warning("⚠️ 用户中断流式输出操作")
+            return False
+        except Exception as e:
+            logging.error(f"❌ 流式输出异常中断: {e}")
+            return False
+
     def click_target(self, abs_window_x, abs_window_y, relative_x, relative_y):
         """
         强行接管你的物理鼠标，把指针瞬间甩到红点上点爆它！
@@ -202,6 +304,8 @@ class ActionExecutor:
         except KeyboardInterrupt:
             logging.warning("⚠️ 用户中断操作，取消点击...")
             return
+        except RuntimeError as e:
+            if str(e) == "EngineStopped": return
         except Exception as e:
             logging.warning(f"⚠️ 安全防线：点击前检查失败，继续执行 - {e}")
 
@@ -247,6 +351,8 @@ class ActionExecutor:
         except KeyboardInterrupt:
             logging.warning("⚠️ 用户中断操作，取消双击...")
             return
+        except RuntimeError as e:
+            if str(e) == "EngineStopped": return
         except Exception as e:
             logging.warning(f"⚠️ 安全防线：双击前检查失败，继续执行 - {e}")
 
@@ -270,9 +376,13 @@ class ActionExecutor:
         
     def send_message(self, text: str, auto_send: bool = True):
         """
-        向当前「已处于聚焦状态」的微信输入框砸入一段回答。
-        完美链路设计：文本压入剪贴板 -> Ctrl+V 粘贴 -> Enter 回车
-        （为什么不能直接用 keyboard 输出一个个字母？因为中文和 emoji 以及特殊排版用按键精灵容易造成乱码）
+        向当前「已处于聚焦状态」的微信输入框拟人化地输出回答。
+        升级链路设计：逐字流式粘贴（带防线校验）-> Enter 回车
+        拟人流式输出特点：
+        - 逐字粘贴模拟人类打字节奏
+        - 实时防线校验（鼠标抢夺检测、焦点窗口验证）
+        - 随机延迟模拟打字速度变化
+        - 偶发手误模拟增加真实性
 
         :param text: 要发送的消息文本
         :param auto_send: 是否自动发送，True 为自动发送，False 为只粘贴不发送（辅助模式）
@@ -281,17 +391,10 @@ class ActionExecutor:
             return
 
         mode_desc = "自动发送" if auto_send else "辅助模式（仅粘贴）"
-        logging.info(f"[物理执行层] 接到任务！准备接管剪贴板并释放指令 [{mode_desc}]...")
+        logging.info(f"[物理执行层] 接到任务！准备进行拟人流式输出 [{mode_desc}]...")
 
         # P1 阶段新增：重新记录鼠标位置作为基准（避免之前 click_target 的移动被误判）
         self._record_mouse_position()
-
-        # 1. 记忆倾印：把大脑产出的回复压入操作系统的底层剪贴板
-        try:
-            pyperclip.copy(text)
-        except Exception as e:
-            logging.error(f"❌ 剪贴板操作失败: {e}")
-            return
 
         # 留白时间 0.3 秒，模拟人类目光正在从聊天记录往下看输入框的眼动空隙
         time.sleep(0.3)
@@ -306,26 +409,25 @@ class ActionExecutor:
         except KeyboardInterrupt:
             logging.warning("⚠️ 用户中断操作，取消发送...")
             return
+        except RuntimeError as e:
+            if str(e) == "EngineStopped": return
         except Exception as e:
             logging.warning(f"⚠️ 安全防线：鼠标抢夺检查失败，继续执行 - {e}")
 
         # P1 阶段新增：执行前安全检查 - 验证焦点窗口
         if not self._verify_foreground_window():
-            logging.error("🚨 安全防线：焦点已丢失，中断 Ctrl+V 粘贴操作！")
+            logging.error("🚨 安全防线：焦点已丢失，中断流式输出操作！")
             return
 
-        # 2. 经典连招组合拳：Ctrl + V
-        try:
-            with self.keyboard.pressed(Key.ctrl):
-                self.keyboard.press('v')
-                self.keyboard.release('v')
-        except Exception as e:
-            logging.error(f"❌ 键盘操作失败: {e}")
+        # 核心升级：使用拟人流式输出替代一次性粘贴
+        stream_success = self._stream_type_text(text)
+        if not stream_success:
+            logging.error("❌ 拟人流式输出失败或中断，取消发送操作")
             return
 
         # 如果是辅助模式，只粘贴不发送
         if not auto_send:
-            logging.info(f"[物理执行层] 辅助模式 - 内容已粘贴到输入框，等待用户手动发送。字数统计：{len(text)}")
+            logging.info(f"[物理执行层] 辅助模式 - 内容已流式输出到输入框，等待用户手动发送。字数统计：{len(text)}")
             return
 
         # 留白时间 0.4 秒，模拟人类打完字大脑核对内容有没有病句的短暂停顿（强行防风控）
@@ -340,6 +442,8 @@ class ActionExecutor:
         except KeyboardInterrupt:
             logging.warning("⚠️ 用户中断操作，取消发送...")
             return
+        except RuntimeError as e:
+            if str(e) == "EngineStopped": return
         except Exception as e:
             logging.warning(f"⚠️ 安全防线：鼠标抢夺检查失败，继续执行 - {e}")
 
@@ -355,7 +459,7 @@ class ActionExecutor:
             logging.error(f"❌ 回车键操作失败: {e}")
             return
 
-        logging.info(f"[物理执行层] 一套连招 (Ctrl+V + Enter) 已成功命中输入框！字数统计：{len(text)}")
+        logging.info(f"[物理执行层] 拟人流式输出 + Enter 发送已完成！字数统计：{len(text)}")
 
     def press_escape(self):
         """
